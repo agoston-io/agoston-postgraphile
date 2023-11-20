@@ -1,16 +1,18 @@
-drop FUNCTION if exists agoston_api.set_user_role (p_user_id int DEFAULT NULL, p_role_id int DEFAULT NULL);
+alter table agoston_identity.user_identities alter column user_role_id SET DEFAULT 2;
+alter table agoston_identity.user_roles drop column if exists is_authenticated_default;
+alter table agoston_identity.user_roles drop column if exists is_anonymous_default;
+drop sequence if exists agoston_identity.user_roles_id_seq;
+--
+drop FUNCTION if exists agoston_api.set_user_role (p_user_id int, p_role_id int);
 drop FUNCTION if exists agoston_api.add_user_role ( p_role_name text );
 drop FUNCTION if exists agoston_api.rename_user_role ( p_role_id int, p_new_role_name text );
 drop FUNCTION if exists agoston_api.delete_user_role ( p_role_id int );
 drop FUNCTION if exists agoston_api.set_default_role_id_when_anonymous (p_role_id int);
 drop FUNCTION if exists agoston_api.get_default_role_id_when_anonymous ();
+drop FUNCTION if exists agoston_api.get_default_role_name_when_anonymous ();
 drop FUNCTION if exists agoston_api.set_default_role_id_when_authenticated (p_role_id int);
 drop FUNCTION if exists agoston_api.get_default_role_id_when_authenticated ();
-drop FUNCTION if exists agoston_api.get_default_role_name_when_anonymous ();
-drop FUNCTION if exists agoston_api.add_user (p_role_id int DEFAULT NULL);
-alter table agoston_identity.user_roles drop column is_authenticated_default;
-alter table agoston_identity.user_roles drop column is_anonymous_default;
-drop sequence if exists agoston_identity.user_roles_id_seq;
+drop FUNCTION if exists agoston_api.add_user (p_role_id int);
 
 --
 
