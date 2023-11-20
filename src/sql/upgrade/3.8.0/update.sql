@@ -1,6 +1,7 @@
 alter table agoston_identity.user_identities alter column user_role_id SET DEFAULT 2;
 alter table agoston_identity.user_roles drop column if exists is_authenticated_default;
 alter table agoston_identity.user_roles drop column if exists is_anonymous_default;
+alter table agoston_identity.user_roles alter column id drop default;
 drop sequence if exists agoston_identity.user_roles_id_seq;
 --
 drop FUNCTION if exists agoston_api.set_user_role (p_user_id int, p_role_id int);
