@@ -1,0 +1,15 @@
+- var title = `Auth strategy not enabled`
+- var loginRedirectUrls = "auth_redirect_success=/auth/session&auth_redirect_error=/auth/session";
+- var logoutRedirectUrls = "auth_redirect_logout=/auth/session";
+html
+  head
+    style
+      include auth.css
+    title= title
+  body
+    h2=`Auth strategy '${authStrategy.name}' is not enabled`
+    p
+      a(href=`https://docs.agoston.io/authentication.html#${authStrategy.name}-strategy`, target="_blank")= `🛈 How to enable auth strategy '${authStrategy.name}'?`
+
+  include footer.pug
+

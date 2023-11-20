@@ -1,0 +1,90 @@
+- var title = `Backend session`
+- var loginRedirectUrls = "auth_redirect_success=/auth/session&auth_redirect_error=/auth/session";
+- var logoutRedirectUrls = "auth_redirect_logout=/auth/session";
+html
+  head
+    style
+      include auth.css
+    title= title
+  body
+    h2 Session data
+    p
+      ul
+        li
+          span(class="bold") Do I have an authenticated session?
+          span(class=hasSession ? 'true' : 'false')= ` ${hasSession}`
+          if hasSession
+            span= ` (`
+            a(href=`/auth/logout?${logoutRedirectUrls}`)= `logout`
+            span= `)`
+            li
+              span(class="bold") Session cookie:
+              span= ` ${JSON.stringify(session.cookie)}`
+            li
+              span(class="bold") User id:
+              span= ` ${JSON.stringify(user.user_id)}`
+            li
+              span(class="bold") User role:
+              span= ` ${JSON.stringify(user.role_name)}`
+
+    h2 Redirections
+    p To instruct the backend to redirect the user after a successful or failed login or logout, use these parameters in the URL:
+    ul
+      li
+        span(class="bold")= ` auth_redirect_success: `
+        span where to redirect the user after a successful login
+      li
+        span(class="bold")= `auth_redirect_error: `
+        span where to redirect the user after a failed login
+      li
+        span(class="bold")= `auth_redirect_logout: `
+        span where to redirect the user after a logout
+
+    p(class="bold")= `Example: `
+      code= `<login URL of one of the authentication strategy>?auth_redirect_success=/auth/session&auth_redirect_error=/auth/session`
+
+    p
+      a(href=`https://docs.agoston.io/authentication.html#redirection`, target="_blank") 🛈 More info on redirections
+
+    h2 Authentication strategies
+    table
+      tr
+        th Type
+        th Name
+        th State
+        th Auth URL
+      each authStrategy in authStrategiesAvailable
+        tr
+          td passport
+          td
+            span=`${authStrategy.name}`
+          td(class="center")
+            span(class=authStrategyIsEnable(authStrategy) ? 'true' : 'false')= `${authStrategyIsEnable(authStrategy) ? 'enable' : 'disable'}`
+          td(class="center")
+            if authStrategy.hasAuthLink
+              a(href=`/auth/${authStrategy.name}?${loginRedirectUrls}`) URL
+      each oidcConfig in authOidc
+        tr
+          td oidc
+          td
+            span=`${oidcConfig.name}`
+          td(class="center")
+            span(class=oidcConfig.enable ? 'true' : 'false')= `${oidcConfig.enable ? 'enable' : 'disable'}`
+          td(class="center")
+            a(href=`/auth/oidc/${oidcConfig.name}?${loginRedirectUrls}`) URL
+
+    if authStrategyIsEnable({"name":"user-pwd"})
+      h2 Authentication with user / password
+        form(action="/auth/user-pwd?redirect=true&auth_redirect_success=/auth/session&auth_redirect_error=/auth/session",class="loginForm",method="post")
+          label(for="username") Username
+          input(type="text",name="username",id="username")
+          br
+          label(for="password") Password
+          input(type="password",name="password",id="password")
+          br
+          input(type="hidden",name="free_value",id="free_value",value={'attr1': 'val1', 'attr2': 'val2'})
+          br
+          input(type="submit", value="login / signup", class="button")
+
+    include footer.pug
+

@@ -1,0 +1,83 @@
+{
+  "name": "agoston",
+  "version": "3.8.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "serve": "node index.js"
+  },
+  "sql": {
+    "initSqlDirectory": "./sql/init",
+    "upgradeSqlDirectory": "./sql/upgrade"
+  },
+  "authStrategiesAvailable": [
+    {
+      "name": "http-bearer",
+      "hasAuthLink": false,
+      "isCookieBased": false
+    },
+    {
+      "name": "user-pwd",
+      "hasAuthLink": false,
+      "isCookieBased": true
+    },
+    {
+      "name": "google-oauth20",
+      "hasAuthLink": true,
+      "isCookieBased": true
+    },
+    {
+      "name": "github-oauth20",
+      "hasAuthLink": true,
+      "isCookieBased": true
+    },
+    {
+      "name": "facebook-oauth20",
+      "hasAuthLink": true,
+      "isCookieBased": true
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/niolap/agoston.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/niolap/agoston/issues"
+  },
+  "homepage": "https://github.com/niolap/agoston#readme",
+  "dependencies": {
+    "@graphile-contrib/pg-simplify-inflector": "^6.1.0",
+    "@graphile/operation-hooks": "^1.0.0",
+    "@graphile/pg-aggregates": "^0.1.1",
+    "@graphile/pg-pubsub": "^4.13.0",
+    "axios": "^1.4.0",
+    "body-parser": "^1.20.2",
+    "connect-pg-simple": "^8.0.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "express-openid-connect": "^2.16.0",
+    "express-promise-router": "^4.1.1",
+    "express-session": "^1.17.3",
+    "graphile-worker": "^0.13.0",
+    "jose": "^4.14.4",
+    "morgan": "^1.10.0",
+    "node-fetch": "^3.3.1",
+    "nodemailer": "^6.9.4",
+    "openid-client": "^5.4.2",
+    "passport": "^0.6.0",
+    "passport-facebook": "^3.0.0",
+    "passport-github2": "^0.1.12",
+    "passport-google-oauth": "^2.0.0",
+    "passport-http-bearer": "^1.0.1",
+    "passport-local": "^1.0.0",
+    "pg": "^8.10.0",
+    "postgraphile": "^4.13.0",
+    "pug": "^3.0.2",
+    "semver": "^7.3.8",
+    "stripe": "^10.17.0"
+  }
+}

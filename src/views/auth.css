@@ -1,0 +1,104 @@
+body {
+    background-color: #1a1a1a;
+    color: #fff;
+    font-family: Lucida Console,Lucida Sans Typewriter,monaco,Bitstream Vera Sans Mono,monospace;
+    font-size: 14px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #d400ff;
+}
+
+ul {
+    list-style-type: square;
+}
+
+th, td {
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+.button {
+  background-color: #d400ff;
+  border-radius: 8px;
+  border-style: none;
+  box-sizing: border-box;
+  color: #FFFFFF;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 500;
+  height: 40px;
+  line-height: 20px;
+  list-style: none;
+  margin: 0;
+  outline: none;
+  padding: 10px 16px;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  transition: color 100ms;
+  vertical-align: baseline;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.button:hover,
+.button:focus {
+  background-color: #d400ffed;
+}
+
+.loginForm {
+    margin: 15px;
+}
+
+.loginForm label {
+    color: #fff;
+    font-size: 14px;
+    margin-right: 10px;
+}
+
+.loginForm input {
+    margin-bottom: 10px;
+}
+
+.center {
+    text-align: center;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.true {
+    color: #00ff88;
+}
+
+.false {
+    color: #dc3545;
+}
+
+a:link {
+    color: #ff00ff;
+    text-decoration: none;
+}
+
+a:visited {
+    color: #ff00ff;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #d400ff;
+    text-decoration: none;
+}
+
+a:active {
+    color: #ff00ff;
+    text-decoration: none;
+}
+
+footer {
+    margin-top: 75px;
+}

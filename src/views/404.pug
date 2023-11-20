@@ -1,0 +1,21 @@
+- var title = `404 - Not found`
+- var loginRedirectUrls = "auth_redirect_success=/auth/session&auth_redirect_error=/auth/session";
+- var logoutRedirectUrls = "auth_redirect_logout=/auth/session";
+html
+  head
+    style
+      include auth.css
+    title= title
+  body
+    h2= title
+    p Maybe you need one of these?
+      ul
+        li
+          a(href=`/auth/session`) /auth/session
+        li
+          a(href=`/data/graphiql`) /data/graphiql
+        li
+          a(href=`/.well-known/configuration`) /.well-known/configuration
+
+    include footer.pug
+

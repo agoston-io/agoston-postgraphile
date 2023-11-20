@@ -1,0 +1,138 @@
+function validURL(str) {
+    var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
+        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|' + // domain name
+        '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+        '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+        '(\\#[-a-z\\d_]*)?$', 'i'); // fragment locator
+    return !!pattern.test(str);
+}
+
+function deriveAuthRedirectUrl(req, user_redirect_param) {
+    var baseReferrer = '/'
+    var redirect = baseReferrer
+    if (req.get('Referrer') !== undefined) {
+        baseReferrer = req.get('Referrer').match('^.+?[^\/:](?=[?\/]|$)')[0]
+        redirect = req.get('Referrer')
+    }
+    if (req.query[user_redirect_param] !== undefined) {
+        if (req.query[user_redirect_param].startsWith("/")) {
+            redirect = `${baseReferrer}${req.query[user_redirect_param]}`
+        }
+        if (req.query[user_redirect_param].startsWith("http")) {
+            redirect = req.query[user_redirect_param]
+        }
+    }
+    return redirect;
+}
+
+module.exports = {
+    validURL: validURL,
+    stringToBoolean: function (value) {
+        return (String(value) === '1' || String(value).toLowerCase() === 'true' || String(value).toLowerCase() === 'yes');
+    },
+    formatCORSInput: function (corsOriginsInput) {
+        var corsOrigins = {};
+        corsOrigins.allowedlist = [];
+        corsOrigins.skippedlist = [];
+        corsOriginsInput.split(',').forEach(function (corsOrigin, i) {
+            var corsOriginTrimmed = corsOrigin.trim();
+            if (validURL(corsOriginTrimmed)) {
+                corsOrigins.allowedlist.push(corsOriginTrimmed);
+                console.info(`INFO: [CORS] Allowed valid origin ${i}: '${corsOriginTrimmed}'`)
+            } else {
+                corsOrigins.skippedlist.push(corsOriginTrimmed);
+                console.info(`INFO: [CORS] Skipped unvalid origin ${i}: '${corsOriginTrimmed}'`)
+            }
+        });
+        return corsOrigins
+    },
+    authStrategyGetParameterValue: function (authStrategyName, parameter) {
+        const authStrategies = require('./config-environment').authStrategies
+        if (!authStrategies.hasOwnProperty(authStrategyName)) {
+            throw new TypeError(`No auth strategy '${authStrategyName}'`);
+        }
+        if (!authStrategies[authStrategyName].hasOwnProperty('params')) {
+            throw new TypeError(`No 'params' attribute for auth strategy '${authStrategyName}'`);
+        }
+        if (!authStrategies[authStrategyName].params.hasOwnProperty(parameter)) {
+            throw new TypeError(`No parameter '${parameter}' for auth strategy '${authStrategyName}'`);
+        }
+        console.log(`AUTH: ${authStrategyName}: ${parameter}=${authStrategies[authStrategyName].params[parameter]}`)
+        return authStrategies[authStrategyName].params[parameter];
+    },
+    getAuthStrategiesAvailable: function (strategyType) {
+        const authStrategiesAvailable = require('./config-environment').authStrategiesAvailable
+        var authStrategiesAvailableFiltered = []
+        switch (strategyType) {
+            case 'cookie-based':
+                for (const authStrategy of authStrategiesAvailable) {
+                    if (authStrategy.isCookieBased) {
+                        authStrategiesAvailableFiltered.push(authStrategy)
+                    }
+                }
+                break;
+            case 'header-based':
+                for (const authStrategy of authStrategiesAvailable) {
+                    if (!authStrategy.isCookieBased) {
+                        authStrategiesAvailableFiltered.push(authStrategy)
+                    }
+                }
+                break;
+            default:
+                authStrategiesAvailableFiltered = authStrategiesAvailable
+                break;
+        }
+        return authStrategiesAvailableFiltered;
+    },
+    authStrategyIsEnable: function (authStrategy) {
+        const authStrategies = require('./config-environment').authStrategies
+        if (authStrategies.hasOwnProperty(authStrategy.name)) {
+            if (authStrategies[authStrategy.name].hasOwnProperty('enable')) {
+                if (authStrategies[authStrategy.name]['enable']) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    },
+    deriveAuthRedirectUrl: deriveAuthRedirectUrl,
+    buildAuthState: function (req) {
+        return JSON.stringify({
+            r: {
+                success: deriveAuthRedirectUrl(req, 'auth_redirect_success'),
+                error: deriveAuthRedirectUrl(req, 'auth_redirect_error'),
+            }
+        }).toString('base64')
+    },
+    getBoolean: function (value) {
+        if (typeof value === 'string') {
+            switch (value.toLowerCase()) {
+                case "true":
+                case "1":
+                case "on":
+                case "yes":
+                    return true;
+                default:
+                    return false;
+            }
+        }
+        if (typeof value === 'number') {
+            switch (value) {
+                case 1:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+        if (typeof value === 'boolean') {
+            switch (value) {
+                case true:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+    }
+};
+
