@@ -41,7 +41,6 @@ router.get(`/logout`, (req, res) => {
 })
 
 router.post(`/logout`, (req, res) => {
-    console.log(req.session)
     if (req.session.hasOwnProperty("passport")) {
         if (req.session.passport.hasOwnProperty("user")) {
             if (req.session.passport.user.hasOwnProperty("role_name")) {
