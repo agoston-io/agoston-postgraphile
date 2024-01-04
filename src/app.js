@@ -4,7 +4,17 @@ const cors = require('cors');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 
-const { corsOrigins, backendHttpPortListening, environment, version } = require('./config-environment')
+const {
+    corsOrigins,
+    backendHttpListening,
+    backendHttpPortListening,
+    backendHttpsListening,
+    backendHttpsPortListening,
+    backendHttpsCertificate,
+    backendHttpsPrivateKey,
+    environment,
+    version
+} = require('./config-environment')
 
 // Applications
 module.exports = async function app() {
@@ -47,8 +57,25 @@ module.exports = async function app() {
     const mountRoutes = require('./routes')
     mountRoutes(app)
 
-    // Listening
-    app.listen(backendHttpPortListening, () => {
-        console.info(`INFO: ${environment} server v${version} listening on ${backendHttpPortListening}.`);
-    });
+    // Listening Http
+    if (backendHttpListening) {
+        var http = require('http');
+        var httpServer = http.createServer(app);
+        httpServer.listen(backendHttpPortListening, () => {
+            console.info(`INFO: ${environment} HTTP server v${version} listening on ${backendHttpPortListening}.`);
+        });
+    }
+
+    // Listening Https
+    if (backendHttpsListening) {
+        var fs = require('fs');
+        var https = require('https');
+        var privateKey = fs.readFileSync(backendHttpsPrivateKey, 'utf8');
+        var certificate = fs.readFileSync(backendHttpsCertificate, 'utf8');
+        var credentials = { key: privateKey, cert: certificate };
+        var httpsServer = https.createServer(credentials, app);
+        httpsServer.listen(backendHttpsPortListening, () => {
+            console.info(`INFO: ${environment} HTTPS server v${version} listening on ${backendHttpsPortListening}.`);
+        });
+    }
 }

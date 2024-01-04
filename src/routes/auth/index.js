@@ -39,3 +39,24 @@ router.get(`/logout`, (req, res) => {
         res.redirect(deriveAuthRedirectUrl(req, 'auth_redirect_logout'));
     });
 })
+
+router.post(`/logout`, (req, res) => {
+    console.log(req.session)
+    if (req.session.hasOwnProperty("passport")) {
+        if (req.session.passport.hasOwnProperty("user")) {
+            if (req.session.passport.user.hasOwnProperty("role_name")) {
+                if (req.session.passport.user.role_name === 'authenticated') {
+                    req.session.destroy(function (err) {
+                        res.status(201).json({
+                            message: 'session destroyed'
+                        });
+                    });
+                }
+            }
+        }
+    } else {
+        res.status(404).json({
+            message: 'session unknown'
+        });
+    }
+})

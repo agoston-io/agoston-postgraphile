@@ -1,12 +1,20 @@
-export ENVIRONMENT_NAME=development
+
+#---------- HTTP configuration
+export HTTP_LISTENING=1
 export HTTP_PORT_LISTENING=8080
+export HTTPS_LISTENING=0
+export HTTPS_PORT_LISTENING=8043
+export HTTPS_PORT_CERTIFICATE=/tmp/server.crt
+export HTTPS_PORT_PRIVATEKEY=/tmp/server.key
+#---------- All
+export ENVIRONMENT_NAME=development
 export HTTP_BACKEND_ORIGIN='https://graphile.agoston-dev.io'
 export PGHOST=localhost
 export PGDATABASE=agoston-1
 export POSTGRES_PASSWORD=agoston
-export POSTGRAPHILE_USER='postgraphile1'
+export POSTGRAPHILE_USER='postgraphile-1'
 export POSTGRAPHILE_PASSWORD=agoston
-export DEVELOPER_USER='developer1'
+export DEVELOPER_USER='developer-1'
 export DEVELOPER_PASSWORD=agoston
 export CORS_ORIGIN='https://127.0.0.1:5173,http://127.0.0.1:5173,https://127.0.0.1:3000,http://127.0.0.1:3000,https://127.0.0.1:8080,http://127.0.0.1:8080'
 export SESSION_COOKIE_SECRET=JWaaEHOnJyMYvB06Q0cqRDhMgRpD0Cfy
