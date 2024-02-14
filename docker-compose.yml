@@ -1,0 +1,57 @@
+---
+version: "3.9"
+networks:
+  agoston:
+services:
+  postgres:
+    healthcheck:
+      test: "su - postgres -c 'pg_isready -d agoston'"
+      interval: 5s
+      retries: 5
+    image: agostops/agoston-postgres:v16.2.0
+    pull_policy: always
+    command: >
+      -c search_path='agoston_public,agoston_api,agoston_identity,agoston_metadata,public'
+      -c cron.database_name='agoston'
+      -c timezone='Europe/Zurich'
+      -c tcp_keepalives_idle=60
+    environment:
+      - POSTGRES_DB=agoston
+      - POSTGRES_PASSWORD=agoston
+    sysctls:
+      - net.ipv4.tcp_keepalive_time=60
+    networks:
+      - agoston
+    ports:
+      - "5552:5432"
+
+  postgraphile:
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: >
+        wget -q -O-
+        --header='Content-Type:application/json'
+        --post-data '{"query":"query {session}"}'
+        http://localhost:8080/data/graphql
+        | grep anonymous || exit 1
+      interval: 5s
+      retries: 5
+    image: agoston-postgraphile-dev
+    build: .
+    environment:
+      - ENVIRONMENT_NAME=development
+      - HTTP_BACKEND_ORIGIN=https://graphile.agoston-dev.io
+      - NODE_ENV=development
+      - AUTH_STRATEGIES={"http-bearer":{"enable":true},"user-pwd":{"enable":true}}
+      - CORS_ORIGIN=http://localhost:3000,https://localhost:3000
+    sysctls:
+      - net.ipv4.tcp_keepalive_time=60
+    volumes:
+      - ./src:/app
+    working_dir: /app
+    networks:
+      - agoston
+    ports:
+      - "8080:8080"
