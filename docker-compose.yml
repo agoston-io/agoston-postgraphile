@@ -45,11 +45,13 @@ services:
       - HTTP_BACKEND_ORIGIN=https://graphile.agoston-dev.io
       - NODE_ENV=development
       - AUTH_STRATEGIES={"http-bearer":{"enable":true},"user-pwd":{"enable":true}}
-      - CORS_ORIGIN=http://localhost:3000,https://localhost:3000
+      - CORS_ORIGIN=http://localhost:3000,https://localhost:3000,http://127.0.0.1:3000,https://127.0.0.1:3000
+      - UPLOAD_DIR_NAME=/uploads
     sysctls:
       - net.ipv4.tcp_keepalive_time=60
     volumes:
       - ./src:/app
+      - /tmp:/uploads
     working_dir: /app
     networks:
       - agoston

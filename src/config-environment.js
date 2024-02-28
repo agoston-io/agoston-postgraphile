@@ -59,4 +59,6 @@ module.exports = {
     workerStmpSecure: helpers.getBoolean(process.env.WORKER_EMAIL_SMTP_SECURE || true),
     workerStmpAuthUser: process.env.WORKER_EMAIL_SMTP_AUTH_USER || '',
     workerStmpAuthPass: process.env.WORKER_EMAIL_SMTP_AUTH_PASS || '',
+    // Upload
+    UploadDirName: process.env.UPLOAD_DIR_NAME || './uploads'
 }

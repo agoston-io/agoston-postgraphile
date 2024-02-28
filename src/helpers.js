@@ -34,15 +34,13 @@ module.exports = {
     formatCORSInput: function (corsOriginsInput) {
         var corsOrigins = {};
         corsOrigins.allowedlist = [];
-        corsOrigins.skippedlist = [];
         corsOriginsInput.split(',').forEach(function (corsOrigin, i) {
             var corsOriginTrimmed = corsOrigin.trim();
             if (validURL(corsOriginTrimmed)) {
                 corsOrigins.allowedlist.push(corsOriginTrimmed);
-                console.info(`INFO: [CORS] Allowed valid origin ${i}: '${corsOriginTrimmed}'`)
+                console.info(`INFO | CORS | Allowed valid origin ${i}: '${corsOriginTrimmed}'`)
             } else {
-                corsOrigins.skippedlist.push(corsOriginTrimmed);
-                console.info(`INFO: [CORS] Skipped unvalid origin ${i}: '${corsOriginTrimmed}'`)
+                throw new Error(`Origin '${corsOrigin}' is invalid.`)
             }
         });
         return corsOrigins

@@ -31,13 +31,13 @@ module.exports = async function app() {
             if (corsOrigins.allowedlist.indexOf(origin) !== -1 || !origin) {
                 callback(null, true)
             } else {
-                callback(new Error(`Origin '${origin}' rejected by CORS. Allowed: ${corsOrigins.allowedlist}. Skipped: ${corsOrigins.skippedlist}.`))
+                callback(new Error(`Origin '${origin}' rejected by CORS. Allowed: ${corsOrigins.allowedlist}.`))
             }
         },
         "methods": ['GET', 'PUT', 'POST', 'DELETE', 'OPTIONS'],
         "credentials": true,
         "preflightContinue": true,
-        "allowedHeaders": ['Content-Type', 'Authorization', 'Recaptcha-Token', 'stripe-signature']
+        "allowedHeaders": ['Content-Type', 'Content-Length', 'Authorization', 'Recaptcha-Token', 'stripe-signature']
     }));
 
     // Morgan logger
@@ -62,7 +62,7 @@ module.exports = async function app() {
         var http = require('http');
         var httpServer = http.createServer(app);
         httpServer.listen(backendHttpPortListening, () => {
-            console.info(`INFO: ${environment} HTTP server v${version} listening on ${backendHttpPortListening}.`);
+            console.info(`INFO | SERVER | ${environment} HTTP server v${version} listening on ${backendHttpPortListening}.`);
         });
     }
 

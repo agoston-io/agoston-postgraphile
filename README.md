@@ -2,13 +2,14 @@
 
 Build and scale Apps like a team of experts in a week.
 
-Agoston extends the beautiful [Postgraphile](https://github.com/graphile/crystal/tree/main/postgraphile/postgraphile) with all the features you need to develop an application:
+Agoston extends the powerful [Postgraphile](https://github.com/graphile/crystal/tree/main/postgraphile/postgraphile) with all the features you need to develop a complete, full-stack, application:
 
-- Authentication: Google, Facebook, Github, OIDC, HTTP Bearer token, user/password.
+- Authentication: Google, Facebook, Github, Auth0, OIDC, HTTP Bearer token, user/password.
 - Session: Agoston creates a user session and stores it in the Postgres database.
-- User permissions: In Postgres, requests with a `user id` allow you to define fine-grained permissions with Postgres RLS.
-- [Job queue](https://worker.graphile.org/docs): job queue which uses PostgreSQL to store jobs, and executes them on Node.js.
-- [Recurring tasks (crontab)](https://worker.graphile.org/docs/cron): recurring tasks according to a cron-like schedule.
+- User permissions: In Postgres, requests are identified with an `user_id` to allow fine-grained permissions with Postgres RLS.
+- [Files upload](https://github.com/graphile-contrib/postgraphile-upload-example): Upload files to your backend via standard GraphQL mutation.
+- [Job queue](https://worker.graphile.org/docs): Job queue which uses PostgreSQL to store jobs, and executes them on Node.js.
+- [Recurring tasks (crontab)](https://worker.graphile.org/docs/cron): Recurring tasks according to a cron-like schedule.
 
 ## Cloud deployment
 
@@ -75,6 +76,8 @@ export WORKER_EMAIL_SMTP_PORT=25
 export WORKER_EMAIL_SMTP_SECURE=true
 export WORKER_EMAIL_SMTP_AUTH_USER=
 export WORKER_EMAIL_SMTP_AUTH_PASS=
+#---------- GraphQL upload file location
+export UPLOAD_DIR_NAME='./uploads'
 ```
 
 ## Test
@@ -90,3 +93,13 @@ export WORKER_EMAIL_SMTP_AUTH_PASS=
 ```
 stripe listen --forward-to localhost:4000/hook/stripe
 ```
+
+## GraphQL file upload
+
+To turn a GrahpQL attribute to an `upload` data type and thus accept uploads through GraphQL mutations, you must add a Postgraphile tag `@upload` in the table column. Such a column will then receive the file path and file metadata, and the file will be uploaded in the upload directory defined by `UPLOAD_DIR_NAME` (default value: `./uploads`). Example:
+
+```
+comment on column post.header_image_file is E'@upload';
+```
+
+**NOTE**: You may need to adjust the reverse proxy configuration to allow bigger file uploads (e.g., `client_max_body_size 64M;` in nginx). Otherwise, the client would receive a `HTTP 413 (Request Entity Too Large)` error.

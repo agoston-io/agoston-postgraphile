@@ -1,0 +1,112 @@
+.create-post-header {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+form {
+  display: grid;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+@media (min-width: 400px) {
+  form {
+    grid-template-columns: auto 1fr;
+    grid-gap: 10px;
+  }
+
+  label {
+    text-align: right;
+    grid-column: 1 / 2;
+  }
+
+  input,
+  button,
+  label.input {
+    grid-column: 2 / 3;
+  }
+}
+
+input[type="text"],
+select,
+textarea,
+button {
+  padding: 4px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background: white;
+}
+
+input[type="file"] {
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+label.input {
+  position: relative;
+}
+
+form button {
+  border: 1px solid #ccc;
+  padding: 4px;
+  width: 100%;
+  cursor: pointer;
+}
+
+form button input:disabled {
+  background: inherit;
+  color: inherit;
+  border: 0;
+  text-align: center;
+  cursor: pointer;
+}
+
+form.locked {
+  pointer-events: none;
+}
+
+@keyframes spinner {
+  to {transform: rotate(360deg);}
+}
+
+form button[type="submit"].spinner {
+  position: relative;
+}
+
+form button[type="submit"].spinner:after {
+  content: '';
+  box-sizing: border-box;
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  width: 20px;
+  height: 20px;
+  margin-top: -10px;
+  margin-left: -10px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  border-top-color: #333;
+  animation: spinner 0.7s linear infinite;
+  z-index: 2;
+  opacity: 0.0;
+  transition: opacity .5s ease;
+}
+
+form.locked button[type="submit"].spinner:after {
+  opacity: 0.5;
+}
+
+form.locked button[type="submit"] {
+  background-color: gainsboro;
+  border-color: gainsboro;
+}
+
+/* Firefox fix */
+button::-moz-focus-inner {
+  border: 0;
+}
