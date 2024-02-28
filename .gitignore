@@ -3,4 +3,3 @@ build
 isolate-*
 processed*.txt
 .npm
-src/uploads/*
