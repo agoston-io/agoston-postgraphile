@@ -168,7 +168,7 @@ module.exports = async function migration() {
 
     // Update version in database
     databaseFinalVersion = await updateVersion(client, softwareVersion)
-    console.log(`INFO | MIGRATION | databaseFinalVersion: ${databaseVersion}`)
+    console.log(`INFO | MIGRATION | databaseFinalVersion: ${databaseFinalVersion}`)
 
     // Update users' password
     await updateUserPassword(client, pgDeveloperUser, pgDeveloperPassword)
