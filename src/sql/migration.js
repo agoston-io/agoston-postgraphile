@@ -116,13 +116,13 @@ async function upgrade(client, databaseVersion, upgradeSqlDirectory) {
     } catch (err) {
         throw new Error(err)
     }
-    console.log(`INFO | MIGRATION | upgrade | versions detected: ${JSON.stringify(versionDir)}`)
+    console.log(`INFO | MIGRATION | SQL patch(es) detected: ${JSON.stringify(versionDir)}`)
     versionDir.forEach(function (item) {
         if (semver.gt(item, databaseVersion) && semver.lte(item, softwareVersion)) {
             versionToApply.push(item);
         }
     });
-    console.log(`INFO | MIGRATION | upgrade | versions to apply: ${JSON.stringify(versionToApply)}`)
+    console.log(`INFO | MIGRATION | SQL patch(es) to apply: ${JSON.stringify(versionToApply)}`)
     for (const version of versionToApply) {
         await executeDirSqlScript(client, `${upgradeSqlDirectory}/${version}`)
     }
