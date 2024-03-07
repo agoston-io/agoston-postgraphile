@@ -7,7 +7,8 @@ const PostGraphileUploadFieldPlugin = require("postgraphile-plugin-upload-field"
 const { graphqlUploadExpress } = require("graphql-upload");
 const fs = require("fs");
 const path = require("path");
-const { environment, pgpSchema, pgPostgresUri, pgPostgraphileUri, pgDefaultAnonymousRole, UploadDirName } = require('../config-environment')
+const { getPgSettings } = require('../helpers');
+const { environment, pgpSchema, pgPostgresUri, pgPostgraphileUri, UploadDirName, pgDefaultAnonymousRole } = require('../config-environment')
 
 const router = new Router()
 module.exports = router
@@ -62,49 +63,6 @@ const pluginHook = makePluginHook([
     require("@graphile/operation-hooks").default
 ]);
 
-function getPgRole(req) {
-    if (req.user === undefined) {
-        return pgDefaultAnonymousRole;
-    }
-    return req.user.role_name;
-}
-function getAuthProvider(req) {
-    if (req.user === undefined) {
-        return null;
-    }
-    return req.user.auth_provider;
-}
-function getAuthSubject(req) {
-    if (req.user === undefined) {
-        return null;
-    }
-    return req.user.auth_subject;
-}
-function getAuthData(req) {
-    if (req.user === undefined) {
-        return null;
-    }
-    return req.user.auth_data;
-}
-function getSessionId(req) {
-    if (req.sessionID === undefined) {
-        return 'no-session-id';
-    }
-    return req.sessionID;
-}
-function isSessionAuthenticated(req) {
-    if (req.user === undefined) {
-        return false;
-    }
-    return true;
-}
-function getPgUserId(req) {
-    if (req.user === undefined) {
-        return 0;
-    }
-    return req.user.user_id;
-}
-
 const postgraphileOptions = {
     pluginHook,
     appendPlugins: [
@@ -117,15 +75,7 @@ const postgraphileOptions = {
         require('../expressSession').get(),
         require('passport').authenticate('session'),
     ],
-    pgSettings: async req => ({
-        'role': getPgRole(req),
-        'session.id': getSessionId(req),
-        'session.is_authenticated': isSessionAuthenticated(req),
-        'session.user_id': getPgUserId(req),
-        'session.auth_provider': getAuthProvider(req),
-        'session.auth_subject': getAuthSubject(req),
-        'session.auth_data': getAuthData(req),
-    }),
+    pgSettings: async req => (getPgSettings(req, pgDefaultAnonymousRole)),
     graphileBuildOptions: {
         uploadFieldDefinitions: [
             {

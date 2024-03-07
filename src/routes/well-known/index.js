@@ -1,10 +1,54 @@
 const Router = require('express-promise-router')
-const { authStrategies, authStrategiesAvailable, authOidc, version, backendOrigin } = require('../../config-environment')
+const { authStrategies, authStrategiesAvailable, authOidc, version, backendOrigin, pgPostgresUri, pgpSchema, pgDefaultAnonymousRole } = require('../../config-environment')
+const { watchPostGraphileSchema, withPostGraphileContext } = require('postgraphile');
+const { getPgSettings } = require('../../helpers');
+const { graphql } = require('graphql');
+const { pool } = require('./../../db-pool-postgraphile');
+const PgSimplifyInflectorPlugin = require("@graphile-contrib/pg-simplify-inflector");
+const PgAggregatesPlugin = require("@graphile/pg-aggregates").default;
 
 const router = new Router()
 module.exports = router
 
-router.get('/configuration', (req, res) => {
+// For custom local configuration queries.
+// Avoid client round trip when calling the configuration file with a custom GraphQL query.
+let graphqlSchema;
+watchPostGraphileSchema(
+    pgPostgresUri,
+    pgpSchema,
+    {
+        dynamicJson: true,
+        appendPlugins: [
+            PgAggregatesPlugin,
+            PgSimplifyInflectorPlugin
+        ],
+    },
+    (newSchema) => {
+        graphqlSchema = newSchema;
+    },
+).then(() => { console.log("INFO | CONFIGURATION | GraphQL schema generated and watched.") })
+    .catch(error => { console.error(error) });
+
+async function performQuery(graphqlSchema, req, query, variables, operationName = null) {
+    return await withPostGraphileContext(
+        {
+            pgPool: pool,
+            pgSettings: getPgSettings(req, pgDefaultAnonymousRole),
+        },
+        async context => {
+            return await graphql(
+                graphqlSchema,
+                query,
+                null,
+                { ...context },
+                variables,
+                operationName
+            );
+        }
+    );
+}
+
+router.get('/configuration', async (req, res) => {
     var authStrategiesWithLinkExposed = {}
     var authStrategiesWithoutLinkExposed = {}
     for (const strategy of authStrategiesAvailable) {
@@ -39,6 +83,21 @@ router.get('/configuration', (req, res) => {
             enable: true
         };
     }
+
+    // Get current session data
+    currentSession = await performQuery(graphqlSchema, req, `query {session}`)
+
+    // Execute custom query if any
+    customGraphQLQueryResult = null
+    if (req.query.gq !== undefined) {
+        graphQlQuery = decodeURI(req.query.gq)
+        graphQlQueryVariables = null
+        if (req.query.gqv !== undefined) {
+            graphQlQueryVariables = JSON.parse(decodeURI(req.query.gqv))
+        }
+        customGraphQLQueryResult = await performQuery(graphqlSchema, req, graphQlQuery, graphQlQueryVariables)
+    }
+
     res.header("Content-Type", 'application/json');
     var body = {
         version: version,
@@ -53,7 +112,9 @@ router.get('/configuration', (req, res) => {
             session_link: `${backendOrigin}/auth/session`,
             with_link: authStrategiesWithLinkExposed,
             without_link: authStrategiesWithoutLinkExposed,
-        }
+        },
+        currentSession: currentSession.data?.session || null,
+        customGraphQLQueryResult: customGraphQLQueryResult
     }
     res.send(JSON.stringify(body, null, 4));
 })

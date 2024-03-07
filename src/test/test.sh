@@ -58,12 +58,55 @@ function run_auth_tests () {
     fi
 }
 
+function run_configuration_tests () {
+    suffix="-${2}"
+    export HTTP_PORT_LISTENING=${1}
+    export PGDATABASE="agoston${suffix}"
+
+    start_graphile
+    # create a token
+    token=$(sudo su - postgres -c "psql ${PGDATABASE} <<<\"select 'token:'||set_user_token(p_user_id => agoston_api.add_user());\""|grep 'token:'|awk -F':' '{print $2}')
+
+    role_detected=$(curl -s -X GET \
+        -H "Content-Type: application/json" \
+        "http://localhost:${HTTP_PORT_LISTENING}/.well-known/configuration?gq=query%7Bsession%7D" | jq -r '.currentSession.role')
+    if [[ "${role_detected}" != "anonymous" ]]; then
+        echo "role_detected != anonymous"; exit 1
+    fi
+
+    role_detected=$(curl -s -X GET \
+        -H "Content-Type: application/json" \
+        "http://localhost:${HTTP_PORT_LISTENING}/.well-known/configuration?gq=query%7Bsession%7D" | jq -r '.customGraphQLQueryResult.data.session.role')
+    if [[ "${role_detected}" != "anonymous" ]]; then
+        echo "role_detected != anonymous"; exit 1
+    fi
+
+    role_detected=$(curl -s -X GET \
+        -H ""Authorization": Bearer ${token}" \
+        -H "Content-Type: application/json" \
+        "http://localhost:${HTTP_PORT_LISTENING}/.well-known/configuration?gq=query%7Bsession%7D" | jq -r '.currentSession.role')
+    if [[ "${role_detected}" != "authenticated" ]]; then
+        echo "role_detected != authenticated"; exit 1
+    fi
+
+    role_detected=$(curl -s -X GET \
+        -H ""Authorization": Bearer ${token}" \
+        -H "Content-Type: application/json" \
+        "http://localhost:${HTTP_PORT_LISTENING}/.well-known/configuration?gq=query%7Bsession%7D" | jq -r '.customGraphQLQueryResult.data.session.role')
+    if [[ "${role_detected}" != "authenticated" ]]; then
+        echo "role_detected != authenticated"; exit 1
+    fi
+}
+
+
 # Program
 echo "START"
 # -- single db mode
 ${SCRIPTPATH}/stop_any_graphile.sh
 ${SCRIPTPATH}/test_reset_db.sh
 run_tests 8880 "test" 1
+${SCRIPTPATH}/stop_any_graphile.sh
+run_configuration_tests 8880 1
 ${SCRIPTPATH}/stop_any_graphile.sh
 run_tests 8880 "test-cron-job" 1
 ${SCRIPTPATH}/stop_any_graphile.sh

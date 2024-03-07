@@ -88,11 +88,137 @@ export UPLOAD_DIR_NAME='./uploads'
 ./src/test/test.sh
 ```
 
-## Stripe hook
+## Authentication
 
+### HTTP Bearer
+
+Generate a bearer token for a user (or a new user created on the fly with `agoston_api.add_user()`):
+
+```sql
+select set_user_token(p_user_id => 1) as "token";
+select set_user_token(p_user_id => agoston_api.add_user()) as "token";
+                                                             token
+-------------------------------------------------------------------------------------------------------------------------------
+ uYNtAHQ5tRuByn8X7WBaK6TQRSdA9EzbR7zn8lq7tnJntfnwksLGVbnn2BxhhYj14RrnE2REB2Uxx11luAuGGP5afmQNQp4tR7vHd992wNXGfn6X2AF
+(1 row)
 ```
-stripe listen --forward-to localhost:4000/hook/stripe
+
+#### Example without bearer token
+
+```bash
+$ curl -s -X POST \
+-H "Content-Type: application/json" \
+-d '{"query": "query {session}"}' \
+'http://localhost:8080/data/graphql' | jq
 ```
+
+```json
+{
+  "data": {
+    "session": {
+      "role": "anonymous",
+      "user_id": 0,
+      "auth_data": null,
+      "session_id": "iDYWVlGp5OYU6JyEd3zfOZH5RFVRwaZ0",
+      "auth_subject": null,
+      "auth_provider": null,
+      "is_authenticated": false
+    }
+  }
+}
+```
+
+#### Example with bearer token
+
+```bash
+curl -s -X POST \
+-H ""Authorization": Bearer uYNtAHQ5tRuByn8X7WBaK6TQRSdA9EzbR7zn8lq7tnJntfnwksLGVbnn2BxhhYj14RrnE2REB2Uxx11luAuGGP5afmQNQp4tR7vHd992wNXGfn6X2AF" \
+-H "Content-Type: application/json" \
+-d '{"query": "query {session}"}' \
+'http://localhost:8080/data/graphql' | jq
+```
+
+```json
+{
+  "data": {
+    "session": {
+      "role": "authenticated",
+      "user_id": 1,
+      "auth_data": {},
+      "session_id": "PPDqL4IwaIZ3WmQmGyz5e_bV_iWgFnBj",
+      "auth_subject": "1",
+      "auth_provider": "http-bearer",
+      "is_authenticated": true
+    }
+  }
+}
+```
+
+## Backend run time configuration
+
+You can see the run-time configuration that the backend uses by calling the URL `<HTTP_BACKEND_ORIGIN>/.well-known/configuration`:
+
+```json
+{
+    "version": "3.11.1",
+    "endpoints": {
+        "graphql": "https://graphile.agoston-dev.io/data/graphql",
+        "graphql_ws": "wss://graphile.agoston-dev.io/data/graphql"
+    },
+    ...
+    // The JSON configuration will also show the session values:
+    "currentSession": {
+        "role": "authenticated",
+        "user_id": 1,
+        "auth_data": {
+            "attr1": "val1",
+            "attr2": "val2"
+        },
+        "session_id": "KzNcgOEk-HkpKQcrPGTY00VS57crj2G6",
+        "auth_subject": "niolap2",
+        "auth_provider": "user-pwd",
+        "is_authenticated": true
+    },
+    // The JSON configuration can render an optional custom query:
+    "customGraphQLQueryResult": {
+        "data": {
+            "post": {
+                "id": 2
+            }
+        }
+    }
+}
+```
+
+### Custom query
+
+You can also add a custom query as a URL parameter `?gq=` with optional query variables parameter `&gqv=`.
+It's useful when you load from the frontend configuration and want to load some application data without having to perform an additional round trip to the backend.
+
+- gq: a GraphQL query or mutation (no subscription supported) URL-encoded.
+- gqv: a JSON string URL-encoded holding the variables of your graphQL query.
+
+For instance:
+
+```json
+// $ curl 'http://localhost:8080/.well-known/configuration?gq=query%20MyQuery%28%24id%3A%20Int%20%3D%201%29%20%7B%0A%20%20post%28id%3A%20%24id%29%20%7B%0A%20%20%20%20id%0A%20%20%7D%0A%7D%0A&gqv=%7B%22id%22%3A2%7D'
+{
+    "version": "3.11.1",
+    "endpoints": {
+        "graphql": "https://graphile.agoston-dev.io/data/graphql",
+        "graphql_ws": "wss://graphile.agoston-dev.io/data/graphql"
+    },
+    ...
+    "customGraphQLQueryResult": {
+        "data": {
+            "post": {
+                "id": 2
+            }
+        }
+    }
+}
+```
+
 
 ## GraphQL file upload
 
@@ -103,3 +229,9 @@ comment on column post.header_image_file is E'@upload';
 ```
 
 **NOTE**: You may need to adjust the reverse proxy configuration to allow bigger file uploads (e.g., `client_max_body_size 64M;` in nginx). Otherwise, the client would receive a `HTTP 413 (Request Entity Too Large)` error.
+
+## Stripe hook
+
+```
+stripe listen --forward-to localhost:4000/hook/stripe
+```

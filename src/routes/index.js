@@ -11,7 +11,6 @@ module.exports = app => {
         app.use('/hook/stripe', require('./hook/stripe'))
     }
     app.get('/', (req, res) => { res.redirect("https://agoston.io"); })
-    app.use('/.well-known', wellKnown)
     app.use('/', session) // passport sessions to init before Passport strategies
     for (const authStrategy of helpers.getAuthStrategiesAvailable('header-based')) {
         if (helpers.authStrategyIsEnable(authStrategy)) {
@@ -19,6 +18,7 @@ module.exports = app => {
         }
     }
     app.use('/auth', auth)
+    app.use('/.well-known', wellKnown)
     app.use('/data', data)
     const error404 = require('./error404')
     error404(app)
