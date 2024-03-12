@@ -32,7 +32,6 @@ passport.use(new LocalStrategy({ passReqToCallback: true },
             return cb(err);
         }
         if (result.rows[0].user_id === null) { return cb(null, false); } // returns 401
-        req.log_message = `auth[passport-local] user_id: ${result.rows[0].user_id} role_name: ${result.rows[0].role_name}`;
         return cb(null, result.rows[0], { scope: 'all' });
     }
 ));

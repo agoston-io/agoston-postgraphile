@@ -20,7 +20,6 @@ passport.use(new BearerStrategy({ passReqToCallback: true },
             return console.error(`auth[passport-http-bearer] query error: ${err.message}`);
         }
         if (result.rows[0].user_id === null) { return cb(null, false); } // returns 401
-        req.log_message = `auth[passport-http-bearer] user_id: ${result.rows[0].user_id} role_name: ${result.rows[0].role_name}`;
         return cb(null, result.rows[0], { scope: 'all' });
     }
 ));

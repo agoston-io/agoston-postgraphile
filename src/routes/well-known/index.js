@@ -85,10 +85,10 @@ router.get('/configuration', async (req, res) => {
     }
 
     // Get current session data
-    currentSession = await performQuery(graphqlSchema, req, `query {session}`)
+    var currentSession = await performQuery(graphqlSchema, req, `query {session}`)
 
     // Execute custom query if any
-    customGraphQLQueryResult = null
+    var customGraphQLQueryResult = null
     if (req.query.gq !== undefined) {
         graphQlQuery = decodeURI(req.query.gq)
         graphQlQueryVariables = null

@@ -16,7 +16,6 @@ passport.serializeUser(function (user, cb) {
 
 passport.deserializeUser(function (req, user, cb) {
     process.nextTick(function () {
-        req.log_message = `auth[deserializeUser] user_id: ${user.user_id} role_name: ${user.role_name}`;
         return cb(null, user);
     });
 });

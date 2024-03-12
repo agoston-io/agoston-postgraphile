@@ -42,10 +42,10 @@ module.exports = async function app() {
 
     // Morgan logger
     morgan.token('auth', req => {
-        if (req.log_message === undefined) {
-            return 'anonymous query'
+        if (req.user === undefined) {
+            return `auth=anonymous`
         }
-        return req.log_message
+        return `auth=${req.user.auth_provider || 'none'}|${req.user.role_name || 'none'}|user_id=${req.user.user_id || 'none'}`
     })
     morgan.token('origin', req => {
         return req.get('origin');
