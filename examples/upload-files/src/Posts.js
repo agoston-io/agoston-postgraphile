@@ -1,6 +1,5 @@
 import React from 'react';
-import gql from 'graphql-tag';
-import { Query } from 'react-apollo';
+import { useQuery, gql } from '@apollo/client';
 import Post from './Post';
 
 const GET_POSTS = gql`
@@ -15,17 +14,15 @@ const GET_POSTS = gql`
 }
 `;
 
-const Posts = () => (
-  <Query query={GET_POSTS}>
-    {({ loading, error, data }) => {
-      if (loading) return <div>Loading...</div>;
-      if (error) return <div>Error :(</div>;
 
-      return (
-        data.posts.nodes.map(post => Post(post))
-      )
-    }}
-  </Query>
-)
+const Posts = () => {
+
+  const { loading, error, data } = useQuery(GET_POSTS);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error : {error.message}</p>;
+
+  return data.posts.nodes.map(post => Post(post));
+}
 
 export default Posts;

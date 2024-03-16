@@ -3,38 +3,28 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import registerServiceWorker from './registerServiceWorker';
-import { ApolloProvider } from 'react-apollo';
-import { ApolloClient } from 'apollo-client';
-import { InMemoryCache } from 'apollo-cache-inmemory';
-//import { HttpLink } from 'apollo-link-http';
-import { onError } from 'apollo-link-error';
-import { ApolloLink } from 'apollo-link';
+import { ApolloProvider } from '@apollo/client';
+import { AgostonClient } from '@agoston-io/client'
 
-import { createUploadLink } from 'apollo-upload-client'
 
-const client = new ApolloClient({
-  link: ApolloLink.from([
-    onError(({ graphQLErrors, networkError }) => {
-      if (graphQLErrors)
-        graphQLErrors.map(({ message, locations, path }) =>
-          console.log(
-            `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
-          ),
-        );
-      if (networkError) console.log(`[Network error]: ${networkError}`);
-    }),
-    createUploadLink({
-      uri: 'https://graphile.agoston-dev.io/data/graphql'
-    })
-  ]),
-  cache: new InMemoryCache()
+AgostonClient({
+  backendUrl: 'https://graphile.agoston-dev.io',
+}).then(async agostonClient => {
+
+  if (agostonClient.isAuthenticated()) {
+    console.log(`Welcome user ${agostonClient.userId()} 👋! Your role is: ${agostonClient.userRole()}.`);
+  }
+
+  const apolloClient = await agostonClient.createEmbeddedApolloClient();
+
+  const ApolloApp = AppComponent => (
+    <ApolloProvider client={apolloClient}>
+      <AppComponent />
+    </ApolloProvider>
+  );
+
+  ReactDOM.render(ApolloApp(App), document.getElementById('root'));
+  registerServiceWorker();
 });
 
-const ApolloApp = AppComponent => (
-  <ApolloProvider client={client}>
-    <AppComponent />
-  </ApolloProvider>
-);
 
-ReactDOM.render(ApolloApp(App), document.getElementById('root'));
-registerServiceWorker();

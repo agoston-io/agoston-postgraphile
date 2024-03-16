@@ -2,21 +2,17 @@
   "name": "postgraphile-upload-example-client",
   "version": "1.0.0-alpha.0",
   "private": true,
-  "author": "Matt Bretl",
+  "author": "Niolap",
   "license": "MIT",
   "dependencies": {
-    "apollo-cache-inmemory": "^1.6.2",
-    "apollo-client": "^2.6.3",
-    "apollo-link": "^1.2.12",
-    "apollo-link-error": "^1.1.11",
-    "apollo-link-http": "^1.5.15",
-    "apollo-upload-client": "^10.0.1",
-    "graphql": "^14.4.2",
-    "graphql-tag": "^2.10.1",
-    "react": "^16.8.6",
-    "react-apollo": "^2.5.8",
-    "react-dom": "^16.8.6",
-    "react-scripts": "3.0.1"
+    "@agoston-io/client": "^1.2.0",
+    "@apollo/client": "^3.9.7",
+    "apollo-upload-client": "^18.0.1",
+    "graphql": "^16.8.1",
+    "graphql-ws": "^5.15.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "^5.0.1"
   },
   "scripts": {
     "start": "HOST=0.0.0.0 react-scripts start",
@@ -32,5 +28,8 @@
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ]
+  ],
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
+  }
 }
