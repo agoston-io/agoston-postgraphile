@@ -1,0 +1,11 @@
+authorityKeyIdentifier=keyid,issuer
+basicConstraints=CA:FALSE
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+subjectAltName = @alt_names
+[alt_names]
+DNS.1 = graphile.agoston.dev.local
+DNS.2 = www.graphile.agoston.dev.local
+DNS.3 = backend.graphile.agoston.dev.local
+DNS.4 = 2c059b20-a200-45aa-8492-0e2891e14832.backend.graphile.agoston.dev.local
+IP.1 = 192.168.56.56
+IP.2 = 192.168.56.101

@@ -8,7 +8,7 @@ export HTTPS_PORT_CERTIFICATE=/tmp/server.crt
 export HTTPS_PORT_PRIVATEKEY=/tmp/server.key
 #---------- All
 export ENVIRONMENT_NAME=development
-export HTTP_BACKEND_ORIGIN='https://graphile.agoston-dev.io'
+export HTTP_BACKEND_ORIGIN='https://graphile.agoston.dev.local'
 export PGHOST=localhost
 export PGDATABASE=agoston-1
 export POSTGRES_PASSWORD=agoston

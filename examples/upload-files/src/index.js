@@ -8,7 +8,7 @@ import { AgostonClient } from '@agoston-io/client'
 
 
 AgostonClient({
-  backendUrl: 'https://graphile.agoston-dev.io',
+  backendUrl: 'https://graphile.agoston.dev.local',
 }).then(async agostonClient => {
 
   if (agostonClient.isAuthenticated()) {

@@ -75,7 +75,7 @@ module.exports = async function app() {
         var credentials = { key: privateKey, cert: certificate };
         var httpsServer = https.createServer(credentials, app);
         httpsServer.listen(backendHttpsPortListening, () => {
-            console.info(`INFO: ${environment} HTTPS server v${version} listening on ${backendHttpsPortListening}.`);
+            console.info(`INFO | SERVER | ${environment} HTTPS server v${version} listening on ${backendHttpsPortListening}.`);
         });
     }
 }

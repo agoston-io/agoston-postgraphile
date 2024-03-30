@@ -22,6 +22,11 @@ Create an account here: [https://agoston.io/](https://agoston.io/).
 docker compose -f ./docker-compose.yml up
 ```
 
+### Access GraphiQL
+
+- HTTP: http://graphile.agoston.dev.local:8080/data/graphiql
+- HTTPS: https://graphile.agoston.dev.local:8043/data/graphiql
+
 ### To restart on a fresh environment (with new db)
 
 ```bash
@@ -42,7 +47,7 @@ export HTTPS_PORT_CERTIFICATE=/tmp/server.crt
 export HTTPS_PORT_PRIVATEKEY=/tmp/server.key
 #---------- All
 export ENVIRONMENT_NAME=development
-export HTTP_BACKEND_ORIGIN='https://graphile.agoston-dev.io'
+export HTTP_BACKEND_ORIGIN='https://graphile.agoston.dev.local'
 export PGHOST=localhost
 export PGDATABASE=agoston-1
 export POSTGRES_PASSWORD=agoston
@@ -162,8 +167,8 @@ You can see the run-time configuration that the backend uses by calling the URL 
 {
     "version": "3.11.1",
     "endpoints": {
-        "graphql": "https://graphile.agoston-dev.io/data/graphql",
-        "graphql_ws": "wss://graphile.agoston-dev.io/data/graphql"
+        "graphql": "https://graphile.agoston.dev.local/data/graphql",
+        "graphql_ws": "wss://graphile.agoston.dev.local/data/graphql"
     },
     ...
     // The JSON configuration will also show the session values:
@@ -205,8 +210,8 @@ For instance:
 {
     "version": "3.11.1",
     "endpoints": {
-        "graphql": "https://graphile.agoston-dev.io/data/graphql",
-        "graphql_ws": "wss://graphile.agoston-dev.io/data/graphql"
+        "graphql": "https://graphile.agoston.dev.local/data/graphql",
+        "graphql_ws": "wss://graphile.agoston.dev.local/data/graphql"
     },
     ...
     "customGraphQLQueryResult": {
