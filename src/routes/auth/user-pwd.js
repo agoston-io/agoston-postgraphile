@@ -72,4 +72,6 @@ router.post('/user-pwd', bodyParser.json(), function (req, res, next) {
             return
         });
     })(req, res, next)
+
 });
+

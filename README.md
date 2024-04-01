@@ -27,6 +27,12 @@ docker compose -f ./docker-compose.yml up
 - HTTP: http://graphile.agoston.dev.local:8080/data/graphiql
 - HTTPS: https://graphile.agoston.dev.local:8043/data/graphiql
 
+### Connect to the Postgres database
+
+```bash
+psql postgresql://postgres:agoston@localhost:5552/agoston
+```
+
 ### To restart on a fresh environment (with new db)
 
 ```bash
@@ -83,6 +89,8 @@ export WORKER_EMAIL_SMTP_AUTH_USER=
 export WORKER_EMAIL_SMTP_AUTH_PASS=
 #---------- GraphQL upload file location
 export UPLOAD_DIR_NAME='./uploads'
+#---------- Session ID
+export AGOSTON_SESSION_ID_HEADER_NAME='Agoston-Session-Id'
 ```
 
 ## Test
@@ -223,7 +231,6 @@ For instance:
     }
 }
 ```
-
 
 ## GraphQL file upload
 

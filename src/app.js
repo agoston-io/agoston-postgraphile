@@ -3,7 +3,6 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
-
 const {
     corsOrigins,
     backendHttpListening,
@@ -13,7 +12,8 @@ const {
     backendHttpsCertificate,
     backendHttpsPrivateKey,
     environment,
-    version
+    version,
+    agostonSessionIdHeaderName,
 } = require('./config-environment')
 
 // Applications
@@ -37,7 +37,7 @@ module.exports = async function app() {
         "methods": ['GET', 'PUT', 'POST', 'DELETE', 'OPTIONS'],
         "credentials": true,
         "preflightContinue": true,
-        "allowedHeaders": ['Content-Type', 'Content-Length', 'Authorization', 'Recaptcha-Token', 'stripe-signature']
+        "allowedHeaders": ['Content-Type', 'Content-Length', 'Authorization', 'Recaptcha-Token', 'stripe-signature', agostonSessionIdHeaderName]
     }));
 
     // Morgan logger

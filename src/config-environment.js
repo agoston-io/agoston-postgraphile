@@ -60,5 +60,7 @@ module.exports = {
     workerStmpAuthUser: process.env.WORKER_EMAIL_SMTP_AUTH_USER || '',
     workerStmpAuthPass: process.env.WORKER_EMAIL_SMTP_AUTH_PASS || '',
     // Upload
-    UploadDirName: process.env.UPLOAD_DIR_NAME || './uploads'
+    UploadDirName: process.env.UPLOAD_DIR_NAME || './uploads',
+    // Session ID
+    agostonSessionIdHeaderName: process.env.AGOSTON_SESSION_ID_HEADER_NAME || 'Agoston-Session-Id'
 }

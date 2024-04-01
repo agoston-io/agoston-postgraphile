@@ -27,25 +27,6 @@ html
               span(class="bold") User role:
               span= ` ${JSON.stringify(user.role_name)}`
 
-    h2 Redirections
-    p To instruct the backend to redirect the user after a successful or failed login or logout, use these parameters in the URL:
-    ul
-      li
-        span(class="bold")= ` auth_redirect_success: `
-        span where to redirect the user after a successful login
-      li
-        span(class="bold")= `auth_redirect_error: `
-        span where to redirect the user after a failed login
-      li
-        span(class="bold")= `auth_redirect_logout: `
-        span where to redirect the user after a logout
-
-    p(class="bold")= `Example: `
-      code= `<login URL of one of the authentication strategy>?auth_redirect_success=/auth/session&auth_redirect_error=/auth/session`
-
-    p
-      a(href=`https://docs.agoston.io/authentication.html#redirection`, target="_blank") 🛈 More info on redirections
-
     h2 Authentication strategies
     table
       tr

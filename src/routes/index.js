@@ -18,8 +18,9 @@ module.exports = app => {
         }
     }
     app.use('/auth', auth)
+
+
     app.use('/.well-known', wellKnown)
     app.use('/data', data)
-    const error404 = require('./error404')
     error404(app)
 }
