@@ -38,6 +38,7 @@ router.use((req, res, next) => {
 router.use(expressSession);
 router.use(passport.authenticate('session'));
 
+
 passport.serializeUser(function (user, cb) {
     process.nextTick(function () {
         cb(null, user);
