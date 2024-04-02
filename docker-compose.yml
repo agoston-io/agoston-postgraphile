@@ -44,7 +44,7 @@ services:
       - HTTPS_LISTENING=true
       - HTTPS_PORT_CERTIFICATE=/ssl/graphile.agoston.dev.local.crt
       - HTTPS_PORT_PRIVATEKEY=/ssl/graphile.agoston.dev.local.key
-      - HTTP_BACKEND_ORIGIN=https://graphile.agoston.dev.local
+      - HTTP_BACKEND_ORIGIN=https://graphile.agoston.dev.local:8043
       - NODE_ENV=development
       - AUTH_STRATEGIES={"http-bearer":{"enable":true},"user-pwd":{"enable":true}}
       - CORS_ORIGIN=http://localhost:3000,https://localhost:3000,http://127.0.0.1:3000,https://127.0.0.1:3000,http://graphile.agoston.dev.local:8080,https://graphile.agoston.dev.local:8043
