@@ -27,6 +27,12 @@ docker compose -f ./docker-compose.yml up
 - HTTP: http://graphile.agoston.dev.local:8080/data/graphiql
 - HTTPS: https://graphile.agoston.dev.local:8043/data/graphiql
 
+### Connect to the Postgres database
+
+```bash
+psql postgresql://postgres:agoston@localhost:5552/agoston
+```
+
 ### To restart on a fresh environment (with new db)
 
 ```bash
@@ -223,7 +229,6 @@ For instance:
     }
 }
 ```
-
 
 ## GraphQL file upload
 
