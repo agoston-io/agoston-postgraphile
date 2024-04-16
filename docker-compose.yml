@@ -8,15 +8,21 @@ services:
       test: "su - postgres -c 'pg_isready -d agoston'"
       interval: 5s
       retries: 5
-    image: agostops/agoston-postgres:v16.2.0
-    pull_policy: always
+    image: agoston-postgres-dev
+    build:
+      dockerfile: ./postgresDockerfile
     command: >
       -c search_path='agoston_public,agoston_api,agoston_identity,agoston_metadata,public'
       -c timezone='Europe/Zurich'
       -c tcp_keepalives_idle=60
     environment:
+      - TC_ENABLED=1
+      - TC_DEV=eth0
+      - TC_UPLOAD_KBPS=16
       - POSTGRES_DB=agoston
       - POSTGRES_PASSWORD=agoston
+    cap_add:
+      - NET_ADMIN
     sysctls:
       - net.ipv4.tcp_keepalive_time=60
     networks:
@@ -29,8 +35,12 @@ services:
       postgres:
         condition: service_healthy
     image: agoston-postgraphile-dev
-    build: .
+    build:
+      dockerfile: ./postgraphileDockerfile
     environment:
+      - TC_ENABLED=1
+      - TC_DEV=eth0
+      - TC_UPLOAD_KBPS=16
       - ENVIRONMENT_NAME=development
       - HTTPS_LISTENING=true
       - HTTPS_PORT_CERTIFICATE=/ssl/graphile.agoston.dev.local.crt
@@ -40,6 +50,8 @@ services:
       - AUTH_STRATEGIES={"http-bearer":{"enable":true},"user-pwd":{"enable":true}}
       - CORS_ORIGIN=http://localhost:3000,https://localhost:3000,http://127.0.0.1:3000,https://127.0.0.1:3000,http://graphile.agoston.dev.local:8080,https://graphile.agoston.dev.local:8043
       - UPLOAD_DIR_NAME=/uploads
+    cap_add:
+      - NET_ADMIN
     sysctls:
       - net.ipv4.tcp_keepalive_time=60
     volumes:
