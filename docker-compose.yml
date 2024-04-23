@@ -18,7 +18,9 @@ services:
     environment:
       - TC_ENABLED=1
       - TC_DEV=eth0
-      - TC_UPLOAD_KBPS=16
+      - TC_UPLOAD_ALL_KBPS=16
+      - TC_UPLOAD_PORT_NUMBER=5432
+      - TC_UPLOAD_PORT_KBPS=1024
       - POSTGRES_DB=agoston
       - POSTGRES_PASSWORD=agoston
     cap_add:
@@ -28,7 +30,7 @@ services:
     networks:
       - agoston
     ports:
-      - "5552:5432"
+      - "5552:5432" # Connection developers
 
   postgraphile:
     depends_on:
@@ -38,10 +40,10 @@ services:
     build:
       dockerfile: ./postgraphileDockerfile
     environment:
-      - TC_ENABLED=1
+      - TC_ENABLED=0
       - TC_DEV=eth0
-      - TC_UPLOAD_KBPS=16
-      - ENVIRONMENT_NAME=development
+      - TC_UPLOAD_ALL_KBPS=16
+      - ENVIRONMENT_NAME=production
       - HTTPS_LISTENING=true
       - HTTPS_PORT_CERTIFICATE=/ssl/graphile.agoston.dev.local.crt
       - HTTPS_PORT_PRIVATEKEY=/ssl/graphile.agoston.dev.local.key
@@ -62,5 +64,5 @@ services:
     networks:
       - agoston
     ports:
-      - "8080:8080"
-      - "8043:8043"
+      - "8080:8080" # Connection app HTTP
+      - "8043:8043" # Connection app HTTPS
