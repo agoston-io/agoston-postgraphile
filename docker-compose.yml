@@ -15,12 +15,13 @@ services:
       -c search_path='agoston_public,agoston_api,agoston_identity,agoston_metadata,public'
       -c timezone='Europe/Zurich'
       -c tcp_keepalives_idle=60
+      -c log_connections=true
     environment:
       - TC_ENABLED=1
       - TC_DEV=eth0
-      - TC_UPLOAD_ALL_KBPS=16
-      - TC_UPLOAD_PORT_NUMBER=5432
-      - TC_UPLOAD_PORT_KBPS=1024
+      - TC_DELAY_SECOND=10
+      - TC_DELAY_KBPS=1024
+      - TC_UPLOAD_KBPS=16
       - POSTGRES_DB=agoston
       - POSTGRES_PASSWORD=agoston
     cap_add:
@@ -40,10 +41,13 @@ services:
     build:
       dockerfile: ./postgraphileDockerfile
     environment:
-      - TC_ENABLED=0
+      - TC_ENABLED=1
       - TC_DEV=eth0
-      - TC_UPLOAD_ALL_KBPS=16
-      - ENVIRONMENT_NAME=production
+      - TC_DELAY_SECOND=10
+      - TC_DELAY_KBPS=1024
+      - TC_UPLOAD_KBPS=16
+      - PG_POOL_MAX_SIZE=2
+      - ENVIRONMENT_NAME=development
       - HTTPS_LISTENING=true
       - HTTPS_PORT_CERTIFICATE=/ssl/graphile.agoston.dev.local.crt
       - HTTPS_PORT_PRIVATEKEY=/ssl/graphile.agoston.dev.local.key

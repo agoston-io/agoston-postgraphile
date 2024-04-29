@@ -1,17 +1,17 @@
 // Dependencies
 const { Pool } = require('pg')
-const { pgDeveloperUri } = require('../config-environment')
+const { pgDeveloperUri, pgPoolMaxSize } = require('../config-environment')
 
 // DB Pool
 const pool = new Pool({
     connectionString: pgDeveloperUri,
-    max: 5,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 2000,
+    max: pgPoolMaxSize,
+    idleTimeoutMillis: 30 * 1000,
+    connectionTimeoutMillis: 20 * 1000,
 })
 
 module.exports = {
-    pool: pool,
+    pgPoolDeveloper: pool,
     query: (text, params) => pool.query(text, params),
 }
 

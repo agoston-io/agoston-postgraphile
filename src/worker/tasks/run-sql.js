@@ -1,4 +1,4 @@
-const pool = require('../../db-pool-developer');
+const pgPoolDeveloper = require('../../db-pool-developer');
 /*
 ## payload format
 payload.sql
@@ -16,7 +16,7 @@ module.exports = async (payload, helpers) => {
     helpers.logger.debug(`Received ${JSON.stringify(payload)}`);
     var result;
     try {
-        result = await pool.query(payload.sql);
+        result = await pgPoolDeveloper.query(payload.sql);
     } finally {
         await client.end()
     }

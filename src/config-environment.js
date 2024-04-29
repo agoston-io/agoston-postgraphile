@@ -10,6 +10,7 @@ const pgDeveloperUser = process.env.DEVELOPER_USER || 'developer';
 const pgDeveloperPassword = process.env.DEVELOPER_PASSWORD || 'agoston';
 const pgPostgraphileUser = process.env.POSTGRAPHILE_USER || 'postgraphile';
 const pgPostgraphilePassword = process.env.POSTGRAPHILE_PASSWORD || 'agoston';
+const environment = process.env.ENVIRONMENT_NAME || 'production';
 
 module.exports = {
     version: version,
@@ -18,7 +19,7 @@ module.exports = {
     versionPatch: version.split('.')[2],
     debug: parseInt(process.env.DEBUG || 0),
     authStrategiesAvailable: authStrategiesAvailable,
-    environment: process.env.ENVIRONMENT_NAME || 'production',
+    environment: environment,
     backendHttpListening: helpers.stringToBoolean(process.env.HTTP_LISTENING || true),
     backendHttpPortListening: parseInt(process.env.HTTP_PORT_LISTENING || 8080),
     backendHttpsListening: helpers.stringToBoolean(process.env.HTTPS_LISTENING || false),
@@ -28,9 +29,11 @@ module.exports = {
     backendOrigin: process.env.HTTP_BACKEND_ORIGIN || '',
     corsOrigins: helpers.formatCORSInput(`${process.env.HTTP_BACKEND_ORIGIN || ''},${process.env.CORS_ORIGIN || ''}`),
     pgDefaultAnonymousRole: "anonymous",
-    pgPostgresPassword: pgPostgresPassword,
+    // In dev mode, 2 pg conn are used to watch the db changes.
+    pgPoolMaxSize: ((environment === 'production' ? 0 : 2) + parseInt(process.env.PG_POOL_MAX_SIZE || 2)),
     pgPostgresPort: pgPostgresPort,
     pgPostgresDatabase: pgPostgresDatabase,
+    pgPostgresPassword: pgPostgresPassword,
     pgPostgresUri: `postgres://postgres:${pgPostgresPassword}@${pgHost}:${pgPostgresPort}/${pgPostgresDatabase}?sslmode=disable`,
     pgPostgraphileUser: pgPostgraphileUser,
     pgPostgraphilePassword: pgPostgraphilePassword,
