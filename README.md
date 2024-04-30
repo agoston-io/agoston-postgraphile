@@ -91,12 +91,11 @@ export WORKER_EMAIL_SMTP_AUTH_PASS=
 export UPLOAD_DIR_NAME='./uploads'
 ```
 
-## Test
+## Tests
 
 ```bash
-. ./src/test/test_environment.sh
 # export SKIP_FINAL_CLEANUP=1
-./src/test/test.sh
+./tests/run.sh
 ```
 
 ## Authentication

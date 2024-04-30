@@ -8,7 +8,8 @@ const { graphqlUploadExpress } = require("graphql-upload");
 const fs = require("fs");
 const path = require("path");
 const { getPgSettings } = require('../helpers');
-const { environment, pgpSchema, pgPostgresUri, pgPostgraphileUri, UploadDirName, pgDefaultAnonymousRole } = require('../config-environment')
+const db = require('./../db-pool-postgraphile');
+const { environment, pgpSchema, pgPostgresUri, UploadDirName, pgDefaultAnonymousRole } = require('../config-environment')
 
 const router = new Router()
 module.exports = router
@@ -126,9 +127,8 @@ switch (environment) {
         throw `Unknown environment '${environment}'.`;
 }
 
-
 router.use('/', postgraphile(
-    pgPostgraphileUri,
+    db.pgPoolPostgraphile,
     pgpSchema,
     postgraphileOptions
 ));

@@ -98,4 +98,3 @@ begin
     select agoston_api.add_cron_job( task => 'run-sql', identifier => 'run-sql-2', pattern => '* * * * *', payload => '{ "sql": "insert into added_job_table values (1);" }') into v_crontabs;
     select agoston_api.add_cron_job( task => 'run-sql', identifier => 'run-sql-3', pattern => '* * * * *', payload => '{ "sql": "insert into added_job_table values (1);" }') into v_crontabs;
 end $$;
-

@@ -1,11 +1,11 @@
 const expressSession = require('express-session');
 const pgSession = require('connect-pg-simple')(expressSession);
-const db = require('./db-pool-postgraphile');
+const { pgPoolPostgraphile } = require('./db-pool-postgraphile');
 const { sessionCookieSecret } = require('./config-environment')
 
 const sessions = expressSession({
     store: new pgSession({
-        pool: db.pool,
+        pool: pgPoolPostgraphile,
         schemaName: 'agoston_identity',
         tableName: 'user_sessions'
     }),

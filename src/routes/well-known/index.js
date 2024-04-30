@@ -3,7 +3,8 @@ const { authStrategies, authStrategiesAvailable, authOidc, version, backendOrigi
 const { watchPostGraphileSchema, withPostGraphileContext } = require('postgraphile');
 const { getPgSettings } = require('../../helpers');
 const { graphql } = require('graphql');
-const { pool } = require('./../../db-pool-postgraphile');
+const { pgPoolPostgraphile } = require('./../../db-pool-postgraphile');
+const { pgPoolPostgres } = require('../../db-pool-postgres');
 const PgSimplifyInflectorPlugin = require("@graphile-contrib/pg-simplify-inflector");
 const PgAggregatesPlugin = require("@graphile/pg-aggregates").default;
 
@@ -14,7 +15,7 @@ module.exports = router
 // Avoid client round trip when calling the configuration file with a custom GraphQL query.
 let graphqlSchema;
 watchPostGraphileSchema(
-    pgPostgresUri,
+    pgPoolPostgres,
     pgpSchema,
     {
         dynamicJson: true,
@@ -32,7 +33,7 @@ watchPostGraphileSchema(
 async function performQuery(graphqlSchema, req, query, variables, operationName = null) {
     return await withPostGraphileContext(
         {
-            pgPool: pool,
+            pgPool: pgPoolPostgraphile,
             pgSettings: getPgSettings(req, pgDefaultAnonymousRole),
         },
         async context => {
