@@ -1,0 +1,3 @@
+[submodule "agoston-postgres"]
+	path = agoston-postgres
+	url = git@github.com:agoston-io/agoston-postgres.git
