@@ -10,12 +10,12 @@ function backend_start () {
 }
 
 function backend_stop () {
-    docker compose -f ./docker-compose.yml kill
+    docker compose -f ./docker-compose.yml kill || true
 }
 
 function backend_remove () {
-    docker rm agoston-postgraphile-postgraphile-1 agoston-postgraphile-postgres-1
-    docker rmi -f agoston-postgraphile-dev agoston-postgres-dev
+    docker rm agoston-postgraphile-postgraphile-1 agoston-postgraphile-postgres-1 || true
+    docker rmi -f agoston-postgraphile-dev agoston-postgres-dev || true
 }
 
 function run_sql_tests () {
