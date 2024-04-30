@@ -15,7 +15,6 @@ services:
       -c search_path='agoston_public,agoston_api,agoston_identity,agoston_metadata,public'
       -c timezone='Europe/Zurich'
       -c tcp_keepalives_idle=60
-      -c log_connections=true
     environment:
       - TC_ENABLED=1
       - TC_DEV=eth0
@@ -28,6 +27,8 @@ services:
       - NET_ADMIN
     sysctls:
       - net.ipv4.tcp_keepalive_time=60
+    volumes:
+      - ./tests:/tests
     networks:
       - agoston
     ports:
@@ -37,6 +38,15 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    healthcheck:
+      test: >
+        wget -q -O- --no-check-certificate
+        --header='Content-Type:application/json'
+        --post-data '{"query":"query {session}"}'
+        https://localhost:8043/data/graphql
+        || exit 1
+      interval: 5s
+      retries: 5
     image: agoston-postgraphile-dev
     build:
       dockerfile: ./postgraphileDockerfile
@@ -61,6 +71,7 @@ services:
     sysctls:
       - net.ipv4.tcp_keepalive_time=60
     volumes:
+      - ./tests:/tests
       - ./src:/app
       - ./dev/ssl:/ssl
       - /tmp:/uploads
