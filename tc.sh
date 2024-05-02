@@ -1,8 +1,8 @@
 #!/bin/sh
 set -x
 if [ -z ${TC_ENABLED} ]; then TC_ENABLED=0; fi
-if [ -z ${TC_DELAY_SECOND} ]; then TC_DELAY_SECOND=10; fi
-if [ -z ${TC_DELAY_KBPS} ]; then TC_DELAY_KBPS=1024; fi
+if [ -z ${TC_DELAY_SECOND} ]; then TC_DELAY_SECOND=0; fi
+if [ -z ${TC_DELAY_KBPS} ]; then TC_DELAY_KBPS=16; fi
 if [ -z ${TC_DEV} ]; then TC_DEV=eth0; fi
 if [ -z ${TC_UPLOAD_KBPS} ]; then TC_UPLOAD_KBPS=16; fi
 
