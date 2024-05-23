@@ -7,7 +7,7 @@ payload.sql
 SELECT add_job(
     'run-sql',
     json_build_object(
-        'sql', 'create table agoston_public.test_worker (id int);'
+        'sql', 'create table agoston_private.test_worker (id int);'
     )
 );
 */

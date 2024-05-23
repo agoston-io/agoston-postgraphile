@@ -85,7 +85,7 @@ do $$
 declare
     v_table_name text;
 begin
-    select tablename into v_table_name from pg_tables where schemaname = 'agoston_public' and tablename  = 'added_job_table';
+    select tablename into v_table_name from pg_tables where schemaname = 'agoston_private' and tablename  = 'added_job_table';
     assert v_table_name = 'added_job_table';
 end $$;
 

@@ -23,7 +23,7 @@ router.post('/', bodyParser.raw({ type: 'application/json' }), async (request, r
     let result;
 
     try {
-        result = await db.query(`select agoston_public.stripe_hook($1) as "return"`, [
+        result = await db.query(`select agoston_private.stripe_hook($1) as "return"`, [
             event,
         ])
     } catch (err) {

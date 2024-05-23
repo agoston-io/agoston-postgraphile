@@ -12,7 +12,7 @@ services:
     build:
       context: ./agoston-postgres
     command: >
-      -c search_path='agoston_public,agoston_private,agoston_api,agoston_identity,agoston_metadata,public'
+      -c search_path='agoston_private,agoston_public,agoston_api,agoston_identity,agoston_metadata,public'
       -c timezone='Europe/Zurich'
       -c tcp_keepalives_idle=60
     environment:

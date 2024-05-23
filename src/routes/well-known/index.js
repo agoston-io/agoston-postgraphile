@@ -4,7 +4,6 @@ const { watchPostGraphileSchema, withPostGraphileContext } = require('postgraphi
 const { getPgSettings } = require('../../helpers');
 const { graphql } = require('graphql');
 const { pgPoolPostgraphile } = require('./../../db-pool-postgraphile');
-const { pgPoolPostgres } = require('../../db-pool-postgres');
 const PgSimplifyInflectorPlugin = require("@graphile-contrib/pg-simplify-inflector");
 const PgAggregatesPlugin = require("@graphile/pg-aggregates").default;
 
@@ -15,7 +14,7 @@ module.exports = router
 // Avoid client round trip when calling the configuration file with a custom GraphQL query.
 let graphqlSchema;
 watchPostGraphileSchema(
-    pgPoolPostgres,
+    pgPostgresUri,
     pgpSchema,
     {
         dynamicJson: true,
