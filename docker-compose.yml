@@ -18,9 +18,8 @@ services:
     environment:
       - TC_ENABLED=1
       - TC_DEV=eth0
-      - TC_DELAY_SECOND=30
-      - TC_DELAY_KBPS=1024
       - TC_UPLOAD_KBPS=16
+      - TC_UPLOAD_CBURST_KB=2048
       - POSTGRES_DB=agoston
       - POSTGRES_PASSWORD=agoston
     cap_add:
@@ -53,9 +52,8 @@ services:
     environment:
       - TC_ENABLED=1
       - TC_DEV=eth0
-      - TC_DELAY_SECOND=30
-      - TC_DELAY_KBPS=1024
       - TC_UPLOAD_KBPS=16
+      - TC_UPLOAD_CBURST_KB=2048
       - PG_POOL_MAX_SIZE=2
       - ENVIRONMENT_NAME=development
       - HTTPS_LISTENING=true

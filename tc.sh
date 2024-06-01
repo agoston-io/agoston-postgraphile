@@ -1,27 +1,19 @@
 #!/bin/sh
 set -x
 if [ -z ${TC_ENABLED} ]; then TC_ENABLED=0; fi
-if [ -z ${TC_DELAY_SECOND} ]; then TC_DELAY_SECOND=0; fi
-if [ -z ${TC_DELAY_KBPS} ]; then TC_DELAY_KBPS=16; fi
 if [ -z ${TC_DEV} ]; then TC_DEV=eth0; fi
 if [ -z ${TC_UPLOAD_KBPS} ]; then TC_UPLOAD_KBPS=16; fi
+if [ -z ${TC_UPLOAD_CBURST_KB} ]; then TC_UPLOAD_CBURST_KB=1024; fi
 
 if [ ${TC_ENABLED} -eq 1 ]; then
 
     for device in $(echo "${TC_DEV}"| tr ',' '\n'|tr -d '[:blank:]'|egrep -v '^$'); do
 
-        echo "INFO | TC | Configuring traffic control on device ${device} with below variables:"
-        echo "INFO | TC | TC_UPLOAD_KBPS=${TC_UPLOAD_KBPS}"
-        echo "INFO | TC | TC_UPLOAD_PORT_NUMBER=${TC_UPLOAD_PORT_NUMBER}"
-
         # Outgoing traffic control
         tc qdisc add dev ${device} root handle 1: htb default 10
         #
-        tc class add dev ${device} parent 1: classid 1:1 htb rate 100mbit
-        tc class add dev ${device} parent 1:1 classid 1:10 htb rate ${TC_DELAY_KBPS}kbps
-        sleep ${TC_DELAY_SECOND} && \
-            tc class change dev ${device} parent 1:1 classid 1:10 htb rate ${TC_UPLOAD_KBPS}kbps \
-            &
+        tc class add dev ${device} parent 1: classid 1:1 htb rate 10mbit
+        tc class add dev ${device} parent 1:1 classid 1:10 htb rate ${TC_UPLOAD_KBPS}kbps cburst ${TC_UPLOAD_CBURST_KB}k
         #
         tc qdisc add dev ${device} parent 1:10 handle 10: sfq perturb 10
         #

@@ -37,7 +37,7 @@ psql postgresql://postgres:agoston@localhost:5552/agoston
 
 ```bash
 docker rm agoston-postgraphile-postgres-1 agoston-postgraphile-postgraphile-1
-docker rmi agoston-postgraphile-dev
+docker rmi agoston-postgraphile-dev agoston-postgres-dev
 ```
 
 ## Backend configuration
