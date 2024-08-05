@@ -4,6 +4,7 @@ const passport = require('passport');
 const bodyParser = require('body-parser');
 const { deriveAuthRedirectUrl } = require('../../helpers')
 const db = require('../../db-pool-postgraphile');
+const { authCreateUserIfNotExits } = require('../../config-environment')
 
 const router = new Router()
 module.exports = router
@@ -21,11 +22,12 @@ passport.use(new LocalStrategy({ passReqToCallback: true },
             return cb(new Error('password too weak'));
         }
         try {
-            result = await db.query('SELECT user_id, role_name, auth_provider, auth_subject, auth_data from agoston_api.set_authenticated_user($1, $2, $3, $4) as (user_id int, role_name text, auth_provider text, auth_subject text, auth_data text)', [
+            result = await db.query('SELECT user_id, role_name, auth_provider, auth_subject, auth_data from agoston_api.set_authenticated_user(p_provider => $1, p_subject => $2, p_raw => $3, p_password => $4, p_create_user_if_not_exits => $5) as (user_id int, role_name text, auth_provider text, auth_subject text, auth_data text)', [
                 'user-pwd',
                 username,
                 req.body.free_value || {},
-                password
+                password,
+                authCreateUserIfNotExits
             ])
         } catch (err) {
             console.log(`auth[passport-local] query error: ${err.message}`);

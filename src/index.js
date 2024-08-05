@@ -1,4 +1,5 @@
 const migration = require("./sql/migration");
+const migrationPreWorker = require("./sql/migrationPreWorker");
 const waitForDb = require("./sql/waitForDb");
 const {
     pgPostgresUri,
@@ -15,22 +16,24 @@ const worker = require("./worker");
 const app = require("./app");
 
 waitForDb(pgPostgresUri).then(() => {
-    worker.runMigrations(
-        pgPostgraphileUri,
-        pgPostgresDatabase,
-        pgPostgraphileUser,
-        pgPostgraphilePassword,
-        workerSchema
-    ).then(() => {
-        migration().then(() => {
-            app();
-            worker.run(
-                pgPostgraphileUri,
-                workerSchema,
-                workerCronJobLimit,
-                workerConcurrency,
-                workerPollInterval
-            );
+    migrationPreWorker().then(() => {
+        worker.runMigrations(
+            pgPostgraphileUri,
+            pgPostgresDatabase,
+            pgPostgraphileUser,
+            pgPostgraphilePassword,
+            workerSchema
+        ).then(() => {
+            migration().then(() => {
+                app();
+                worker.run(
+                    pgPostgraphileUri,
+                    workerSchema,
+                    workerCronJobLimit,
+                    workerConcurrency,
+                    workerPollInterval
+                );
+            })
         })
     })
 })

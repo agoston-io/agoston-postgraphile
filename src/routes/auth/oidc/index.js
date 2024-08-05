@@ -41,7 +41,7 @@ authOidc.forEach(function (oidcConfig) {
                         var u = userinfo.claims()
                         let result;
                         try {
-                            result = await db.query('SELECT user_id, role_name, auth_provider, auth_subject, auth_data from agoston_api.set_authenticated_user($1, $2, $3) as (user_id int, role_name text, auth_provider text, auth_subject text, auth_data text)', [
+                            result = await db.query('SELECT user_id, role_name, auth_provider, auth_subject, auth_data from agoston_api.set_authenticated_user(p_provider => $1, p_subject => $2, p_raw => $3) as (user_id int, role_name text, auth_provider text, auth_subject text, auth_data text)', [
                                 oidcConfig.name,
                                 u.sub,
                                 u
