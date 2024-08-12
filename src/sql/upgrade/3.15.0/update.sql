@@ -203,30 +203,30 @@ alter function agoston_api.delete_cron_job owner to "##POSTGRAPHILE_USER##";
 ----------------------------------------------------------------------
 -- Restore crontab
 ----------------------------------------------------------------------
-do $$
-declare
-  d_crontab record;
-begin
-  if exists ( select * from information_schema.tables where table_schema = 'agoston_api' and table_schema = 'crontabs_saved' ) then
-    raise notice 'Starting migration of crontab %...', d_crontab.task;
-    for d_crontab in ( select * from agoston_api.crontabs_saved order by id) loop
-      select agoston_api.add_cron_job (
-        task => d_crontab.task,
-        match => d_crontab.pattern,
-        backfillPeriod => d_crontab.backfillPeriod,
-        maxAttempts => d_crontab.maxAttempts,
-        queue_name => d_crontab.queue_name,
-        priority => d_crontab.priority,
-        payload => d_crontab.payload,
-        identifier => d_crontab.identifier,
-        enable => d_crontab.enable
-      );
-    raise notice 'Migration of crontab % ok.', d_crontab.task;
-    end loop;
-  end if;
-end $$;
+-- do $$
+-- declare
+--   d_crontab record;
+-- begin
+--   if exists ( select * from information_schema.tables where table_schema = 'agoston_api' and table_schema = 'crontabs_saved' ) then
+--     raise notice 'Starting migration of crontab %...', d_crontab.task;
+--     for d_crontab in ( select * from agoston_api.crontabs_saved order by id) loop
+--       select agoston_api.add_cron_job (
+--         task => d_crontab.task,
+--         match => d_crontab.pattern,
+--         backfillPeriod => d_crontab.backfillPeriod,
+--         maxAttempts => d_crontab.maxAttempts,
+--         queue_name => d_crontab.queue_name,
+--         priority => d_crontab.priority,
+--         payload => d_crontab.payload,
+--         identifier => d_crontab.identifier,
+--         enable => d_crontab.enable
+--       );
+--     raise notice 'Migration of crontab % ok.', d_crontab.task;
+--     end loop;
+--   end if;
+-- end $$;
 
-drop table if exists agoston_api.crontabs_saved;
+-- drop table if exists agoston_api.crontabs_saved;
 
 ----------------------------------------------------------------------
 -- Jobs
