@@ -56,7 +56,7 @@ exports.run = async function (pgUser, workerSchema, workerCronJobLimit, workerCo
             select json_agg(cts.ct) crontabs from (
             select  jsonb_build_object(
                         'task', task,
-                        'pattern', pattern,
+                        'match', match,
                         'options', jsonb_build_object(
                             'backfillPeriod', backfillPeriod,
                             'maxAttempts', maxAttempts,

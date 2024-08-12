@@ -94,7 +94,7 @@ do $$
 declare
     v_crontabs record;
 begin
-    select agoston_api.add_cron_job( task => 'run-sql', identifier => 'run-sql-1', pattern => '* * * * *', payload => '{ "sql": "insert into added_job_table values (1);" }') into v_crontabs;
-    select agoston_api.add_cron_job( task => 'run-sql', identifier => 'run-sql-2', pattern => '* * * * *', payload => '{ "sql": "insert into added_job_table values (1);" }') into v_crontabs;
-    select agoston_api.add_cron_job( task => 'run-sql', identifier => 'run-sql-3', pattern => '* * * * *', payload => '{ "sql": "insert into added_job_table values (1);" }') into v_crontabs;
+    select agoston_api.add_cron_job( task => 'run-sql', identifier => 'run-sql-1', match => '* * * * *', payload => '{ "sql": "insert into added_job_table values (1);" }') into v_crontabs;
+    select agoston_api.add_cron_job( task => 'run-sql', identifier => 'run-sql-2', match => '* * * * *', payload => '{ "sql": "insert into added_job_table values (1);" }') into v_crontabs;
+    select agoston_api.add_cron_job( task => 'run-sql', identifier => 'run-sql-3', match => '* * * * *', payload => '{ "sql": "insert into added_job_table values (1);" }') into v_crontabs;
 end $$;

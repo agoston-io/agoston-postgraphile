@@ -45,10 +45,13 @@ module.exports = {
     sessionCookieSecret: process.env.SESSION_COOKIE_SECRET || 'agoston',
     recaptchaSecretKey: process.env.RECAPTCHA_SECRET_KEY,
     recaptchaScoreThreshold: process.env.RECAPTCHA_SCORE_THRESHOLD || 0.7,
+    // Authentication
     authStrategies: JSON.parse(process.env.AUTH_STRATEGIES || '{}'),
     authOidc: JSON.parse(process.env.AUTH_OIDC || '[]'),
     authOidcTimeout: parseInt(process.env.AUTH_OIDC_TIMEOUT || 10000),
-    stripeHookEnable: helpers.stringToBoolean(process.env.STRIPE_HOOK_ENABLE) || false,
+    authCreateUserIfNotExits: helpers.stringToBoolean(process.env.AUTH_CREATE_USER_IF_NOT_EXITS || true),
+    // Stripe hook
+    stripeHookEnable: helpers.stringToBoolean(process.env.STRIPE_HOOK_ENABLE || false),
     stripeApiKey: process.env.STRIPE_API_KEY || '',
     stripeHookEndPointSecret: process.env.STRIPE_HOOK_ENDPOINT_SECRET || '',
     // Worker
