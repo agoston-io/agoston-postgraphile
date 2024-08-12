@@ -1,7 +1,8 @@
 const { run, runMigrations, parseCronItems } = require("graphile-worker");
-const { Client } = require('pg')
-const { pgPostgresUri } = require('../config-environment')
-var assert = require('assert')
+const { Client } = require('pg');
+const { pgPostgresUri } = require('../config-environment');
+var assert = require('assert');
+const logger = require('../log');
 
 
 exports.runMigrations = async function (pgURI, pgDB, pgUser, pgUserPassword, workerSchema) {
@@ -25,7 +26,7 @@ exports.runMigrations = async function (pgURI, pgDB, pgUser, pgUserPassword, wor
             end $$;
         `);
     } catch (err) {
-        console.log(err)
+        logger.error(err)
     }
 
     await runMigrations({
@@ -36,7 +37,7 @@ exports.runMigrations = async function (pgURI, pgDB, pgUser, pgUserPassword, wor
     try {
         await client.end()
     } catch (err) {
-        console.log(err)
+        logger.error(err)
     }
 }
 
@@ -75,7 +76,7 @@ exports.run = async function (pgUser, workerSchema, workerCronJobLimit, workerCo
         await client.end()
     }
 
-    console.log(`[WORKER] Crontab(s) discovered: ${JSON.stringify(crontabs.rows[0]["crontabs"], null, 2)}`)
+    logger.info(`[WORKER] Crontab(s) discovered: ${JSON.stringify(crontabs.rows[0]["crontabs"], null, 4)}`)
 
     const runner = run({
         connectionString: pgUser,

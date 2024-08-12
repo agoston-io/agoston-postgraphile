@@ -10,7 +10,7 @@ router.use(passport.authenticate('session'));
 
 passport.serializeUser(function (user, cb) {
     process.nextTick(function () {
-        cb(null, { user_id: user.user_id, role_name: user.role_name, auth_provider: user.auth_provider, auth_subject: user.auth_subject, auth_data: user.auth_data });
+        cb(null, { user_id: user.user_id, role_name: user.role_name, auth_provider: user.auth_provider, auth_subject: user.auth_subject, auth_data: user.auth_data, oidc: user.oidc });
     });
 });
 

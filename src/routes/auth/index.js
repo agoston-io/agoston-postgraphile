@@ -1,5 +1,7 @@
 const Router = require('express-promise-router')
 const { getAuthStrategiesAvailable, authStrategyIsEnable, deriveAuthRedirectUrl } = require('../../helpers')
+const logger = require('../../log')
+
 const { authStrategies, authStrategiesAvailable, authOidc, version } = require('../../config-environment')
 const oidc = require('./oidc')
 
@@ -22,7 +24,7 @@ router.get(`/session`, (req, res) => {
         hasSession: hasSession,
         session: req.session,
         user: req.user,
-        authStrategyIsEnable: authStrategyIsEnable
+        authStrategyIsEnable: authStrategyIsEnable,
     })
 })
 
@@ -35,8 +37,16 @@ for (const authStrategy of getAuthStrategiesAvailable('cookie-based')) {
 router.use('/oidc', oidc)
 
 router.get(`/logout`, (req, res) => {
+    var logout_frontend_redirect_url = deriveAuthRedirectUrl(req, 'auth_redirect_logout');
+    logger.debug(`logout_frontend_redirect_url => ${logout_frontend_redirect_url}`)
+    logger.debug(`req.session => ${JSON.stringify(req.session)}`)
+    var logout_redirect_url = logout_frontend_redirect_url
+    if (req.session?.passport?.user?.oidc?.issuer_metadata?.end_session_endpoint != undefined) {
+        logout_redirect_url = req.session?.passport?.user?.oidc?.issuer_metadata?.end_session_endpoint + '?id_token_hint=' + req.session?.passport?.user?.oidc?.session_id_token + '&post_logout_redirect_uri=' + logout_frontend_redirect_url;
+    }
+    logger.debug(`logout_redirect_url => ${logout_redirect_url}`)
     req.session.destroy(function (err) {
-        res.redirect(deriveAuthRedirectUrl(req, 'auth_redirect_logout'));
+        res.redirect(logout_redirect_url);
     });
 })
 

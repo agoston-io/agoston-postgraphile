@@ -1,15 +1,19 @@
 
-const Router = require('express-promise-router')
+const Router = require('express-promise-router');
 const passport = require('passport');
 const bodyParser = require('body-parser');
-const { deriveAuthRedirectUrl } = require('../../helpers')
+const { deriveAuthRedirectUrl, authStrategyGetParameterValue } = require('../../helpers');
 const db = require('../../db-pool-postgraphile');
-const { authCreateUserIfNotExits } = require('../../config-environment')
+const logger = require('../../log');
 
 const router = new Router()
 module.exports = router
 
 const LocalStrategy = require('passport-local').Strategy;
+const createUserIfNotExits = authStrategyGetParameterValue('user-pwd', 'createUserIfNotExits');
+if (typeof createUserIfNotExits !== 'boolean') { throw new Error('"createUserIfNotExits" is not a boolean!'); }
+const passwordComplexityPattern = authStrategyGetParameterValue('user-pwd', 'passwordComplexityPattern');
+if (typeof passwordComplexityPattern !== 'boolean') { throw new Error('"passwordComplexityPattern" is not a string!'); }
 
 passport.use(new LocalStrategy({ passReqToCallback: true },
     async function verify(req, username, password, cb) {
@@ -17,20 +21,20 @@ passport.use(new LocalStrategy({ passReqToCallback: true },
         if (!strongUsername.test(username)) {
             return cb(new Error('invalid username'));
         }
-        let strongPassword = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*,\-\_])(?=.{8,})");
+        let strongPassword = new RegExp(passwordComplexityPattern);
         if (!strongPassword.test(password)) {
             return cb(new Error('password too weak'));
         }
         try {
-            result = await db.query('SELECT user_id, role_name, auth_provider, auth_subject, auth_data from agoston_api.set_authenticated_user(p_provider => $1, p_subject => $2, p_raw => $3, p_password => $4, p_create_user_if_not_exits => $5) as (user_id int, role_name text, auth_provider text, auth_subject text, auth_data text)', [
+            result = await db.query('select * from agoston_api.set_authenticated_user(p_provider => $1, p_subject => $2, p_raw => $3, p_password => $4, p_create_user_if_not_exits => $5)', [
                 'user-pwd',
                 username,
                 req.body.free_value || {},
                 password,
-                authCreateUserIfNotExits
+                createUserIfNotExits
             ])
         } catch (err) {
-            console.log(`auth[passport-local] query error: ${err.message}`);
+            logger.error(`auth[passport-local] query error: ${err.message}`);
             return cb(err);
         }
         if (result.rows[0].user_id === null) { return cb(null, false); } // returns 401

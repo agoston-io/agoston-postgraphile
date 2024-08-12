@@ -209,7 +209,7 @@ declare
 begin
   if exists ( select * from information_schema.tables where table_schema = 'agoston_api' and table_name = 'crontabs_saved' ) then
     for d_crontab in ( select * from agoston_api.crontabs_saved order by id) loop
-      raise notice 'Starting migration of crontab %...', d_crontab.task;
+      raise notice 'Starting migration of crontab ''%''...', d_crontab.identifier;
       perform agoston_api.add_cron_job (
         task => d_crontab.task,
         match => d_crontab.pattern,
@@ -221,7 +221,7 @@ begin
         identifier => d_crontab.identifier,
         enable => d_crontab.enable
       );
-      raise notice 'Migration of crontab % ok.', d_crontab.task;
+      raise notice 'Migration of crontab ''%'' ok.', d_crontab.identifier;
     end loop;
   end if;
 end $$;

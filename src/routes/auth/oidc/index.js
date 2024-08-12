@@ -2,6 +2,7 @@ const Router = require('express-promise-router')
 const passport = require('passport');
 const db = require('../../../db-pool-postgraphile');
 const { backendOrigin, authOidc, authOidcTimeout } = require('../../../config-environment')
+const logger = require('../../../log')
 var { custom, Issuer, Strategy } = require('openid-client');
 const { buildAuthState } = require('../../../helpers')
 
@@ -12,16 +13,16 @@ custom.setHttpOptionsDefaults({
     timeout: authOidcTimeout,
 });
 
-console.log(`INFO | AUTH_OIDC | Starting configuration using following input: ${JSON.stringify(authOidc, null, 2)}`);
+logger.debug(`AUTH_OIDC | Starting configuration using following input: ${JSON.stringify(authOidc, null, 4)}`);
 
 authOidc.forEach(function (oidcConfig) {
 
     if (oidcConfig.enable || false) {
-        console.log(`INFO | AUTH_OIDC[${oidcConfig.name}]: adding oidc issuer...`);
+        logger.info(`AUTH_OIDC[${oidcConfig.name}]: adding oidc issuer...`);
 
         Issuer.discover(oidcConfig.params.domain).then(issuer => {
 
-            console.log('INFO | AUTH_OIDC[%s]: Discovered issuer %s %O', oidcConfig.name, issuer.issuer, issuer.metadata);
+            logger.info(`AUTH_OIDC[${oidcConfig.name}]: Discovered issuer ${issuer.issuer} ${JSON.stringify(issuer.metadata, null, 4)}`);
 
             var client = new issuer.Client({
                 client_id: oidcConfig.params.clientId,
@@ -36,21 +37,23 @@ authOidc.forEach(function (oidcConfig) {
                     client: client,
                     passReqToCallback: true
                 },
-                    async function (tokenSet, userinfo, done) {
-                        console.log(`INFO | AUTH_OIDC[${oidcConfig.name}]: userinfo => ${JSON.stringify(userinfo.claims())}`)
-                        var u = userinfo.claims()
+                    async function (tokenset, userinfo, done) {
+                        logger.debug(`AUTH_OIDC[${oidcConfig.name}]: id_token => ${JSON.stringify(userinfo.id_token)}`)
+                        logger.debug(`AUTH_OIDC[${oidcConfig.name}]: userinfo => ${JSON.stringify(userinfo.claims())}`)
+                        var userPayload = userinfo.claims()
                         let result;
                         try {
-                            result = await db.query('SELECT user_id, role_name, auth_provider, auth_subject, auth_data from agoston_api.set_authenticated_user(p_provider => $1, p_subject => $2, p_raw => $3) as (user_id int, role_name text, auth_provider text, auth_subject text, auth_data text)', [
+                            result = await db.query('SELECT * from agoston_api.set_authenticated_user(p_provider => $1, p_subject => $2, p_raw => $3)', [
                                 oidcConfig.name,
-                                u.sub,
-                                u
+                                userPayload.sub,
+                                userPayload
                             ])
                         } catch (err) {
-                            console.error(`ERROR | AUTH_OIDC[${oidcConfig.name}]: query error: ${err.message}`);
+                            logger.error(`ERROR | AUTH_OIDC[${oidcConfig.name}]: query error: ${err.message}`);
                             return done(null, null)
                         }
-                        return done(null, result.rows[0]);
+                        // the ID token is stored into the user_sessions table
+                        return done(null, { ...result.rows[0], ...{ oidc: { issuer_name: oidcConfig.name, issuer_metadata: issuer.metadata, session_id_token: userinfo.id_token } } });
                     }
                 ));
 
@@ -61,7 +64,7 @@ authOidc.forEach(function (oidcConfig) {
 
             router.get(`/${oidcConfig.name}/callback`, function (req, res, next) {
                 passport.authenticate(oidcConfig.name, function (err, user, info, status) {
-                    console.log(`INFO | AUTH_OIDC[${oidcConfig.name}]: info:${info}, status: ${status}`)
+                    logger.info(`AUTH_OIDC[${oidcConfig.name}]: info:${info}, status: ${status}`)
                     if (err) {
                         res.redirect(`${JSON.parse(req.query.state).r.error}?message=bad-request&error=${encodeURI(err.message)}`);
                         return
@@ -81,9 +84,9 @@ authOidc.forEach(function (oidcConfig) {
                 })(req, res, next)
             });
 
-        }).catch(error => console.error(`ERROR | AUTH_OIDC[${oidcConfig.name}]: failed: ${error}`));
+        }).catch(error => logger.error(`AUTH_OIDC[${oidcConfig.name}]: failed: ${error}`));
     } else {
-        console.log(`INFO | AUTH_OIDC[${oidcConfig.name}]: is disabled.`);
+        logger.info(`AUTH_OIDC[${oidcConfig.name}]: is disabled.`);
     }
 
 });

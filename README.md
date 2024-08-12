@@ -173,6 +173,22 @@ curl -s -X POST \
 }
 ```
 
+### Local user and password
+
+You can enable the local user and password authentication by appending that configuration to the `AUTH_STRATEGIES` run time environment variable:
+
+```json
+{
+  "user-pwd": {
+    "enable": true,
+    "params": {
+      "createUserIfNotExits": false,
+      "passwordComplexityPattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*,-_])(?=.{8,})"
+    }
+  }
+}
+```
+
 ## Backend run time configuration
 
 You can see the run-time configuration that the backend uses by calling the URL `<HTTP_BACKEND_ORIGIN>/.well-known/configuration`:

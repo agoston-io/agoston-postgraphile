@@ -1,4 +1,5 @@
-const { Client } = require('pg')
+const { Client } = require('pg');
+const logger = require('../log');
 
 async function sleep(millis) {
     return new Promise(resolve => setTimeout(resolve, millis));
@@ -16,10 +17,10 @@ module.exports = async function waitForDb(pgPostgresUri) {
             });
             await client.connect()
         } catch (err) {
-            console.log(err)
+            logger.error(err)
             connectionRetry--;
             if (connectionRetry === 0) { throw new Error('Connection not ready yet, maximum reties reached.') }
-            console.log(`WAIT FOR DB: Connection not ready yet, retesting in ${connectionDelay} ms. Retry count ${connectionRetry}`)
+            logger.error(`WAIT FOR DB: Connection not ready yet, retesting in ${connectionDelay} ms. Retry count ${connectionRetry}`)
             await sleep(connectionDelay);
             connectionDelay = connectionDelay * 1.25;
         }

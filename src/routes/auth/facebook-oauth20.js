@@ -1,8 +1,9 @@
-const Router = require('express-promise-router')
+const Router = require('express-promise-router');
 const passport = require('passport');
 const db = require('../../db-pool-postgraphile');
-const { backendOrigin } = require('../../config-environment')
-const { authStrategyGetParameterValue, buildAuthState } = require('../../helpers')
+const { backendOrigin } = require('../../config-environment');
+const { authStrategyGetParameterValue, buildAuthState } = require('../../helpers');
+const logger = require('../../log');
 
 const router = new Router()
 module.exports = router
@@ -19,13 +20,13 @@ passport.use(new FacebookStrategy({
     async function (req, accessToken, refreshToken, profile, cb) {
         let result;
         try {
-            result = await db.query('SELECT user_id, role_name, auth_provider, auth_subject, auth_data from agoston_api.set_authenticated_user(p_provider => $1, p_subject => $2, p_raw => $3) as  (user_id int, role_name text, auth_provider text, auth_subject text, auth_data text)', [
+            result = await db.query('select * from agoston_api.set_authenticated_user(p_provider => $1, p_subject => $2, p_raw => $3)', [
                 'facebook',
                 profile.id,
                 profile
             ])
         } catch (err) {
-            console.log(`auth[facebook-oauth20] query error: ${err.message}`);
+            logger.error(`auth[facebook-oauth20] query error: ${err.message}`);
             return cb(err);
         }
         return cb(null, result.rows[0]);

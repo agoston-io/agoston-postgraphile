@@ -36,11 +36,7 @@ module.exports = {
             'session.user_id': req.user === undefined ? 0 : req.user.user_id,
             'session.auth_provider': req.user === undefined ? null : req.user.auth_provider,
             'session.auth_subject': req.user === undefined ? null : req.user.auth_subject,
-            'session.auth_data': req.user === undefined ? null : req.user.auth_data,
         }
-    },
-    stringToBoolean: function (value) {
-        return (String(value) === '1' || String(value).toLowerCase() === 'true' || String(value).toLowerCase() === 'yes');
     },
     formatCORSInput: function (corsOriginsInput) {
         var corsOrigins = {};
@@ -49,7 +45,6 @@ module.exports = {
             var corsOriginTrimmed = corsOrigin.trim();
             if (validURL(corsOriginTrimmed)) {
                 corsOrigins.allowedlist.push(corsOriginTrimmed);
-                console.info(`INFO | CORS | Allowed valid origin ${i}: '${corsOriginTrimmed}'`)
             } else {
                 throw new Error(`Origin '${corsOrigin}' is invalid.`)
             }
@@ -67,7 +62,6 @@ module.exports = {
         if (!authStrategies[authStrategyName].params.hasOwnProperty(parameter)) {
             throw new TypeError(`No parameter '${parameter}' for auth strategy '${authStrategyName}'`);
         }
-        console.log(`AUTH: ${authStrategyName}: ${parameter}=${authStrategies[authStrategyName].params[parameter]}`)
         return authStrategies[authStrategyName].params[parameter];
     },
     getAuthStrategiesAvailable: function (strategyType) {

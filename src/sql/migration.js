@@ -1,8 +1,8 @@
-const { Client } = require('pg')
+const { Client } = require('pg');
 const fs = require('fs');
 const semver = require('semver');
-const softwareVersion = require('../package.json').version
-const dbInitVersion = require('../package.json').dbInitVersion
+const softwareVersion = require('../package.json').version;
+const dbInitVersion = require('../package.json').dbInitVersion;
 const sql = require('../package.json').sql
 const {
     pgPostgresUri,
@@ -12,7 +12,8 @@ const {
     pgPostgraphilePassword,
     pgPostgresDatabase,
     workerSchema,
-} = require('../config-environment')
+} = require('../config-environment');
+const logger = require('../log');
 
 async function updateUserPassword(client, username, password) {
     var query = {
@@ -20,7 +21,7 @@ async function updateUserPassword(client, username, password) {
     }
     var res = {}
     try {
-        console.log(`INFO | MIGRATION | ALTER USER "${username}" PASSWORD '****************'`);
+        logger.info(`MIGRATION | ALTER USER "${username}" PASSWORD '****************'`);
         res = await client.query(query)
     } catch (err) {
         throw new Error(err);
@@ -85,10 +86,10 @@ async function executeSqlScript(client, script) {
         throw new Error(err);
     }
     try {
-        console.log(`INFO | MIGRATION | executeSqlScript | Executing script: ${script}`)
+        logger.info(`MIGRATION | executeSqlScript | Executing script: ${script}`)
         const res = await client.query(sqlCode)
     } catch (err) {
-        console.log(sqlCode)
+        logger.error(sqlCode)
         throw new Error(err);
     }
 }
@@ -116,13 +117,13 @@ async function upgrade(client, databaseVersion, upgradeSqlDirectory) {
     } catch (err) {
         throw new Error(err)
     }
-    console.log(`INFO | MIGRATION | SQL patch(es) detected: ${JSON.stringify(versionDir)}`)
+    logger.info(`MIGRATION | SQL patch(es) detected: ${JSON.stringify(versionDir)}`)
     versionDir.forEach(function (item) {
         if (semver.gt(item, databaseVersion) && semver.lte(item, softwareVersion)) {
             versionToApply.push(item);
         }
     });
-    console.log(`INFO | MIGRATION | SQL patch(es) to apply: ${JSON.stringify(versionToApply)}`)
+    logger.info(`MIGRATION | SQL patch(es) to apply: ${JSON.stringify(versionToApply)}`)
     for (const version of versionToApply) {
         await executeDirSqlScript(client, `${upgradeSqlDirectory}/${version}`)
     }
@@ -130,8 +131,8 @@ async function upgrade(client, databaseVersion, upgradeSqlDirectory) {
 
 module.exports = async function migration() {
 
-    console.log(`INFO | MIGRATION | initSqlDirectory: ${sql.initSqlDirectory}`)
-    console.log(`INFO | MIGRATION | upgradeSqlDirectory: ${sql.upgradeSqlDirectory}`)
+    logger.info(`MIGRATION | initSqlDirectory: ${sql.initSqlDirectory}`)
+    logger.info(`MIGRATION | upgradeSqlDirectory: ${sql.upgradeSqlDirectory}`)
 
     try {
         client = new Client({
@@ -144,31 +145,31 @@ module.exports = async function migration() {
 
     // Start migration process
     if (await isFirstStartBackend(client)) {
-        console.log(`INFO | MIGRATION | dbInitVersion: ${dbInitVersion}`)
+        logger.info(`MIGRATION | dbInitVersion: ${dbInitVersion}`)
         await executeDirSqlScript(client, sql.initSqlDirectory)
         databaseUpdatedVersion = await updateVersion(client, dbInitVersion)
-        console.log(`INFO | MIGRATION | databaseUpdatedVersion: ${databaseUpdatedVersion}`)
+        logger.info(`MIGRATION | databaseUpdatedVersion: ${databaseUpdatedVersion}`)
     }
     databaseVersion = await getDatabaseVersion(client)
-    console.log(`INFO | MIGRATION | softwareVersion: ${softwareVersion}`)
-    console.log(`INFO | MIGRATION | databaseVersion (current): ${databaseVersion}`)
+    logger.info(`MIGRATION | softwareVersion: ${softwareVersion}`)
+    logger.info(`MIGRATION | databaseVersion (current): ${databaseVersion}`)
     switch (true) {
         case (databaseVersion === softwareVersion):
-            console.log('INFO | MIGRATION | No SQL upgrade necessary.');
+            logger.info('MIGRATION | No SQL upgrade necessary.');
             break;
         case (semver.gt(databaseVersion, softwareVersion)):
             throw new Error(`Cannot run older backend version on current database version`);
         case (semver.lt(databaseVersion, softwareVersion)):
-            console.log('INFO | MIGRATION | SQL upgrade maybe require.');
+            logger.info('MIGRATION | SQL upgrade maybe require.');
             await upgrade(client, databaseVersion, sql.upgradeSqlDirectory);
             break;
         default:
-            console.log(`INFO | MIGRATION | Sorry, cannot be.`);
+            logger.info(`MIGRATION | Sorry, cannot be.`);
     }
 
     // Update version in database
     databaseFinalVersion = await updateVersion(client, softwareVersion)
-    console.log(`INFO | MIGRATION | databaseFinalVersion: ${databaseFinalVersion}`)
+    logger.info(`MIGRATION | databaseFinalVersion: ${databaseFinalVersion}`)
 
     // Update users' password
     await updateUserPassword(client, pgDeveloperUser, pgDeveloperPassword)

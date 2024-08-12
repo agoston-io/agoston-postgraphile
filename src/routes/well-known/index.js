@@ -3,6 +3,7 @@ const { authStrategies, authStrategiesAvailable, authOidc, version, backendOrigi
 const { watchPostGraphileSchema, withPostGraphileContext } = require('postgraphile');
 const { getPgSettings } = require('../../helpers');
 const { graphql } = require('graphql');
+const logger = require('../../log')
 const { pgPoolPostgraphile } = require('./../../db-pool-postgraphile');
 const PgSimplifyInflectorPlugin = require("@graphile-contrib/pg-simplify-inflector");
 const PgAggregatesPlugin = require("@graphile/pg-aggregates").default;
@@ -26,8 +27,8 @@ watchPostGraphileSchema(
     (newSchema) => {
         graphqlSchema = newSchema;
     },
-).then(() => { console.log("INFO | CONFIGURATION | GraphQL schema generated and watched.") })
-    .catch(error => { console.error(error) });
+).then(() => { logger.info("CONFIGURATION | GraphQL schema generated and watched.") })
+    .catch(error => { logger.error(error) });
 
 async function performQuery(graphqlSchema, req, query, variables, operationName = null) {
     return await withPostGraphileContext(
