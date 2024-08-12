@@ -81,6 +81,10 @@ END;
 $$
 LANGUAGE plpgsql;
 
+----------------------------------------------------------------------
+-- save existing crontab if any
+----------------------------------------------------------------------
+alter table agoston_api.crontabs rename to crontabs_saved;
 
 ----------------------------------------------------------------------
 -- Cleanup Old job and cron
@@ -89,7 +93,6 @@ drop view if exists agoston_api.jobs cascade;
 drop view if exists agoston_api.job_queues cascade;
 drop view if exists agoston_api.known_crontabs cascade;
 drop table if exists agoston_api.job_tasks cascade;
-drop table if exists agoston_api.crontabs cascade;
 drop view if exists agoston_api.cron_jobs cascade;
 drop function if exists agoston_api.add_cron_job;
 drop function if exists agoston_api.enable_cron_job;
@@ -196,6 +199,23 @@ as $$
   delete from agoston_api.crontabs where id = crontab_id returning *;
 $$ LANGUAGE sql;
 alter function agoston_api.delete_cron_job owner to "##POSTGRAPHILE_USER##";
+
+----------------------------------------------------------------------
+-- Restore crontab
+----------------------------------------------------------------------
+select agoston_api.add_cron_job (
+  task => task,
+  match => pattern,
+  backfillPeriod => backfillPeriod,
+  maxAttempts => maxAttempts,
+  queue_name => queue_name,
+  priority => priority,
+  payload => payload,
+  identifier => identifier,
+  enable => enable
+)
+from agoston_api.crontabs_saved;
+drop table agoston_api.crontabs_saved;
 
 ----------------------------------------------------------------------
 -- Jobs
