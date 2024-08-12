@@ -22,6 +22,15 @@ Create an account here: [https://agoston.io/](https://agoston.io/).
 docker compose -f ./docker-compose.yml up
 ```
 
+```bash
+## Switch to a revious version
+git checkout v3.14.3
+cd src/
+rm -rf ./node_modules/
+npm i
+cd ..
+```
+
 ### Access GraphiQL
 
 - HTTP: http://graphile.agoston.dev.local:8080/data/graphiql
@@ -36,7 +45,7 @@ psql postgresql://postgres:agoston@localhost:5552/agoston
 ### To restart on a fresh environment (with new db)
 
 ```bash
-docker rm agoston-postgraphile-postgres-1 agoston-postgraphile-postgraphile-1
+docker rm agoston-postgraphile-postgres-1 agoston-postgraphile-postgraphile-1; \
 docker rmi agoston-postgraphile-dev agoston-postgres-dev
 ```
 
