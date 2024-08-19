@@ -49,11 +49,7 @@ module.exports = async function app() {
         }
         return `auth=${req.user.auth_provider || 'none'}|${req.user.role_name || 'none'}|user_id=${req.user.user_id || 'none'}`
     })
-    morgan.token('origin', req => {
-        return req.get('origin');
-    })
-
-    app.use(morgan('origin[:origin] :method :url :status :res[content-length] - :response-time ms - :auth', { stream: logger.stream }));
+    app.use(morgan(':method :url :status :res[content-length] - :response-time ms - :auth', { stream: logger.stream }));
 
 
     // Routes

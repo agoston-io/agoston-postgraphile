@@ -16,6 +16,7 @@ services:
       -c timezone='Europe/Zurich'
       -c tcp_keepalives_idle=60
       -c log_min_messages=${PG_LOG_MIN_MESSAGES:-WARNING}
+      -c agoston.encryption_key=${PG_ENCRYPTION_KEY}
     environment:
       - TC_ENABLED=1
       - TC_DEV=eth0
@@ -63,7 +64,7 @@ services:
       - HTTPS_PORT_PRIVATEKEY=/ssl/graphile.agoston.dev.local.key
       - HTTP_BACKEND_ORIGIN=https://graphile.agoston.dev.local:8043
       - NODE_ENV=development
-      - AUTH_STRATEGIES={"http-bearer":{"enable":true},"user-pwd":{"enable":true,"params":{"createUserIfNotExits":true,"passwordComplexityPattern":"^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*,-_])(?=.{8,})"}}}
+      - AUTH_STRATEGIES={"http-bearer":{"enable":true},"user-pwd":{"enable":true,"params":{"createUserIfNotExits":true,"usernameComplexityPattern":"^[0-9]*$","passwordComplexityPattern":"^.*$"}}}
       - CORS_ORIGIN=http://localhost:3000,https://localhost:3000,http://127.0.0.1:3000,https://127.0.0.1:3000,http://graphile.agoston.dev.local:8080,https://graphile.agoston.dev.local:8043
       - UPLOAD_DIR_NAME=/uploads
       - AUTH_OIDC=[${AUTH0_DEV}]

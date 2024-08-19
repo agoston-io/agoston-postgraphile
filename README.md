@@ -182,7 +182,7 @@ You can enable the local user and password authentication by appending that conf
   "user-pwd": {
     "enable": true,
     "params": {
-      "createUserIfNotExits": false,
+      "usernameComplexityPattern": "^[a-z0-9-_.@]{5,}$",
       "passwordComplexityPattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*,-_])(?=.{8,})"
     }
   }

@@ -1,46 +1,70 @@
 drop function agoston_api.set_authenticated_user(text,text,jsonb,text,boolean);
-CREATE OR REPLACE FUNCTION agoston_api.set_authenticated_user (
+create or replace function agoston_api.set_authenticated_user (
         p_provider text,
         p_subject text,
         p_raw jsonb,
         p_password text default null,
+        p_username_complexity_pattern text default '^[a-z0-9-_.@]{5,}$',
+        p_password_complexity_pattern text default '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*,-_])(?=.{8,})',
         p_create_user_if_not_exits boolean default true
 )
-    RETURNS table (
+    returns table (
         user_id int,
         role_name text,
         auth_provider text,
         auth_subject text,
-        auth_data jsonb
+        auth_data jsonb,
+        user_created boolean
     )
     AS $$
-DECLARE
-    v_federated_credential_id integer := NULL;
-    v_user_id integer := NULL;
-BEGIN
+declare
+    v_federated_credential_id integer := null;
+    v_user_id integer := null;
+    v_user_created boolean := false;
+begin
+    raise notice 'p_username_complexity_pattern => %', p_username_complexity_pattern;
+    raise notice 'p_password_complexity_pattern => %', p_password_complexity_pattern;
     raise notice 'p_create_user_if_not_exits => %', p_create_user_if_not_exits;
 
-    SELECT  id INTO v_federated_credential_id
-    FROM    agoston_identity.federated_credentials
-    WHERE   provider = p_provider
-    AND     subject = p_subject;
+    select  id into v_federated_credential_id
+    from    agoston_identity.federated_credentials
+    where   provider = p_provider
+    and     subject = p_subject;
+    raise notice 'v_federated_credential_id => %', v_federated_credential_id;
 
-    -- User never auth before
-    IF v_federated_credential_id IS NULL THEN
-        INSERT INTO agoston_identity.federated_credentials (provider, subject, raw)
-            VALUES (p_provider, p_subject, p_raw)
-        RETURNING id INTO v_federated_credential_id;
-    END IF;
+    -- user never auth before
+    if v_federated_credential_id is null and p_create_user_if_not_exits then
+        -- Ensure username match pattern
+        if p_provider = 'user-pwd' then
+            raise notice 'p_username_complexity_pattern => %', p_username_complexity_pattern;
+            if not p_subject ~ p_username_complexity_pattern then
+                raise exception 'The username provided doesn''t comply with the requirement.';
+            end if;
+        end if;
+        insert into agoston_identity.federated_credentials (provider, subject, raw)
+            values (p_provider, p_subject, p_raw)
+        returning id into v_federated_credential_id;
+    end if;
 
     -- User exists?
-    SELECT  id
-    INTO    v_user_id
-    FROM    agoston_identity.user_identities
-    WHERE   federated_credential_id = v_federated_credential_id;
+    select  id
+    into    v_user_id
+    from    agoston_identity.user_identities
+    where   federated_credential_id = v_federated_credential_id;
     raise notice 'User exists returned => %', v_user_id;
 
     -- User never created before: create it
-    IF v_user_id IS NULL and p_create_user_if_not_exits THEN
+    if v_user_id is null and p_create_user_if_not_exits then
+        v_user_created := true;
+        if p_provider = 'user-pwd' then
+            -- Ensure password match pattern
+            raise notice 'p_password_complexity_pattern => %', p_password_complexity_pattern;
+            raise notice 'p_password => %', p_password;
+            if not  p_password ~ p_password_complexity_pattern then
+                raise exception 'The password provided doesn''t comply with the requirement.';
+            end if;
+        end if;
+        -- Create user
         insert into agoston_identity.user_identities (federated_credential_id)
             values (v_federated_credential_id) returning id into v_user_id;
         if p_password is not null then
@@ -48,7 +72,7 @@ BEGIN
             set hashed_password = public.crypt(p_password, public.gen_salt('md5'))
             where id = v_user_id;
         end if;
-    END IF;
+    end if;
 
     -- return
     if p_password is null and p_provider != 'user-pwd' then
@@ -57,7 +81,8 @@ BEGIN
                 r.name as "role_name",
                 f.provider auth_provider,
                 f.subject auth_subject,
-                f.raw auth_data
+                f.raw auth_data,
+                v_user_created as "user_created"
         from    agoston_identity.user_identities u,
                 agoston_identity.federated_credentials f,
                 agoston_identity.user_roles r
@@ -71,7 +96,8 @@ BEGIN
                 r.name as "role_name",
                 f.provider auth_provider,
                 f.subject auth_subject,
-                f.raw auth_data
+                f.raw auth_data,
+                v_user_created as "user_created"
         from    agoston_identity.user_identities u,
                 agoston_identity.federated_credentials f,
                 agoston_identity.user_roles r
@@ -81,10 +107,9 @@ BEGIN
         and     f.provider = 'user-pwd'
         and     hashed_password = public.crypt(p_password, hashed_password);
     end if;
-END;
+end;
 $$
-LANGUAGE plpgsql;
-
+language plpgsql;
 
 create or replace function agoston_public.session (
 	)
