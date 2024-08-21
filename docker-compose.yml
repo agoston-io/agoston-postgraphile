@@ -16,7 +16,6 @@ services:
       -c timezone='Europe/Zurich'
       -c tcp_keepalives_idle=60
       -c log_min_messages=${PG_LOG_MIN_MESSAGES:-WARNING}
-      -c agoston.encryption_key=${PG_ENCRYPTION_KEY}
     environment:
       - TC_ENABLED=1
       - TC_DEV=eth0

@@ -50,6 +50,7 @@ module.exports = async function migrationPreWorker() {
 
     if (softwareVersion === '3.15.0' && databaseVersion !== '3.15.0' && !isFirstStartedBackend) {
 
+
         logger.info(`MIGRATIONPREWORKER | Worker for Agoston v${softwareVersion} must be upgraded (removed and installed again).`)
 
         await client.query(`
