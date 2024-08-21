@@ -34,7 +34,7 @@ begin
         p_provider => 'user-pwd',
         p_subject => '848456qsdqs56d56qs',
         p_raw => '{"username":"niolap","more_data":{"attr1":"val1"}}',
-        p_password => 'aFakePassword'
+        p_password => 'aFakeP@ssword2025'
     );
     perform agoston_api.set_authenticated_user(
         p_provider => 'google',

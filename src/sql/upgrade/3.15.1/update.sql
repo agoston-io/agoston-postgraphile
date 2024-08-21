@@ -4,7 +4,7 @@ create or replace function agoston_api.set_authenticated_user (
         p_subject text,
         p_raw jsonb,
         p_password text default null,
-        p_username_complexity_pattern text default '^[a-z0-9-_.@]{5,}$',
+        p_username_complexity_pattern text default '^[a-z0-9\-_.@]{5,}$',
         p_password_complexity_pattern text default '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*,-_])(?=.{8,})',
         p_create_user_if_not_exits boolean default true
 )
@@ -14,13 +14,13 @@ create or replace function agoston_api.set_authenticated_user (
         auth_provider text,
         auth_subject text,
         auth_data jsonb,
-        user_created boolean
+        user_existed boolean
     )
     AS $$
 declare
     v_federated_credential_id integer := null;
     v_user_id integer := null;
-    v_user_created boolean := false;
+    v_user_existed boolean := false;
 begin
     raise notice 'p_username_complexity_pattern => %', p_username_complexity_pattern;
     raise notice 'p_password_complexity_pattern => %', p_password_complexity_pattern;
@@ -55,7 +55,7 @@ begin
 
     -- User never created before: create it
     if v_user_id is null and p_create_user_if_not_exits then
-        v_user_created := true;
+        v_user_existed := true;
         if p_provider = 'user-pwd' then
             -- Ensure password match pattern
             raise notice 'p_password_complexity_pattern => %', p_password_complexity_pattern;
@@ -82,7 +82,7 @@ begin
                 f.provider auth_provider,
                 f.subject auth_subject,
                 f.raw auth_data,
-                v_user_created as "user_created"
+                v_user_existed as "user_existed"
         from    agoston_identity.user_identities u,
                 agoston_identity.federated_credentials f,
                 agoston_identity.user_roles r
@@ -97,7 +97,7 @@ begin
                 f.provider auth_provider,
                 f.subject auth_subject,
                 f.raw auth_data,
-                v_user_created as "user_created"
+                v_user_existed as "user_existed"
         from    agoston_identity.user_identities u,
                 agoston_identity.federated_credentials f,
                 agoston_identity.user_roles r
@@ -117,7 +117,6 @@ create or replace function agoston_public.session (
     language 'sql'
     cost 100
     stable parallel unsafe
-    security definer
 AS
 $BODY$
     select jsonb_build_object(
@@ -125,18 +124,7 @@ $BODY$
       'is_authenticated', current_setting('session.is_authenticated', true)::boolean,
       'user_id', current_setting('session.user_id', true)::int,
       'session_id', current_setting('session.id', true)::text,
-      'auth_data', (    select  jsonb_build_object(
-                                    'provider', provider,
-                                    'subject', subject,
-                                    'info', raw
-                                )
-                        from    agoston_identity.federated_credentials
-                        where   id in (
-                            select  federated_credential_id
-                            from    agoston_identity.user_identities
-                            where   id = current_setting('session.user_id', true)::int
-                        )
-                    )
+      'auth_data', current_setting('session.auth_data', true)::jsonb
     );
 
 $BODY$;

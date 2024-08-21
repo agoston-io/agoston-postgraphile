@@ -37,14 +37,12 @@ passport.use(new LocalStrategy({ passReqToCallback: true },
             return cb(err);
         }
         logger.debug(`result.rows[0] ${JSON.stringify(result.rows)}`)
-        if (req.path === '/user-pwd/signup' && result.rows.length > 0 && !createSessionOnSignup && result.rows[0]['user_created']) { return cb(null, false, { message: 'user-created' }); }
-        if (req.path === '/user-pwd/signup' && result.rows.length > 0 && !createSessionOnSignup && !result.rows[0]['user_created']) { return cb(null, false, { message: 'user-exists' }); }
         if (result.rows.length === 0) { return cb(null, false, { message: 'user-not-found' }); }
         return cb(null, result.rows[0], { scope: 'all' });
     }
 ));
 
-const authenticateCallBack = function (req, res, next) {
+router.post('/user-pwd/login', bodyParser.json(), function (req, res, next) {
     passport.authenticate('local', function (err, user, info, status) {
         var skipRedirect = (req.query?.redirect === "false");
         if (err) {
@@ -57,9 +55,9 @@ const authenticateCallBack = function (req, res, next) {
         }
         if (!user) {
             if (skipRedirect) {
-                res.status(401).json({ message: info.message });
+                res.status(401).json({ message: 'not-found' });
             } else {
-                res.redirect(`${deriveAuthRedirectUrl(req, 'auth_redirect_error')}?message=${encodeURI(info.message)}`);
+                res.redirect(`${deriveAuthRedirectUrl(req, 'auth_redirect_error')}?message=not-found`);
             }
             return
         }
@@ -80,10 +78,35 @@ const authenticateCallBack = function (req, res, next) {
             return
         });
     })(req, res, next)
-}
+});
 
-// Cannot create user but can create session
-router.post('/user-pwd/login', bodyParser.json(), authenticateCallBack);
+router.post('/user-pwd/signup', bodyParser.json(), function (req, res, next) {
+    passport.authenticate('local', function (err, user, info, status) {
+        var skipRedirect = (req.query?.redirect === "false");
+        if (err) {
+            if (skipRedirect) {
+                res.status(400).json({ message: err.message });
+            } else {
+                res.redirect(`${deriveAuthRedirectUrl(req, 'auth_redirect_error')}?message=bad-request&error=${encodeURI(err.message)}`);
+            }
+            return
+        }
+        if (!user) {
+            if (skipRedirect) {
+                res.status(401).json({ message: 'internal-error' });
+            } else {
+                res.redirect(`${deriveAuthRedirectUrl(req, 'auth_redirect_error')}?message=internal-error`);
+            }
+            return
+        }
+        var message = 'user-created';
+        if (!user['user_existed']) { message = 'user-existed'; }
+        if (skipRedirect) {
+            res.status(200).json({ message: message });
+        } else {
+            res.redirect(`${deriveAuthRedirectUrl(req, 'auth_redirect_error')}?message=${message}`);
+        }
+        return
 
-// Can create user and if ok create session
-router.post('/user-pwd/signup', bodyParser.json(), authenticateCallBack);
+    })(req, res, next)
+});

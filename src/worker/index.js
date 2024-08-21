@@ -1,9 +1,25 @@
-const { run, runMigrations, parseCronItems } = require("graphile-worker");
+const { run, runMigrations, Logger, parseCronItems } = require("graphile-worker");
 const { Client } = require('pg');
 const { pgPostgresUri } = require('../config-environment');
 var assert = require('assert');
 const logger = require('../log');
 
+const workerLogger = new Logger((scope) => {
+    const childLogger = logger.child(scope);
+    return (level, message, meta) => {
+        switch (level) {
+            case "error":
+                return childLogger.error(`${message || ''} ${JSON.stringify(meta) || ''}`);
+            case "warning":
+                return childLogger.warn(`${message || ''} ${JSON.stringify(meta) || ''}`);
+            case "debug":
+                return childLogger.debug(`${message || ''} ${JSON.stringify(meta) || ''}`);
+            case "info":
+            default:
+                return childLogger.info(`${message || ''} ${JSON.stringify(meta) || ''}`);
+        }
+    };
+});
 
 exports.runMigrations = async function (pgURI, pgDB, pgUser, pgUserPassword, workerSchema) {
     /*
@@ -79,6 +95,7 @@ exports.run = async function (pgUser, workerSchema, workerCronJobLimit, workerCo
     logger.info(`[WORKER] Crontab(s) discovered: ${JSON.stringify(crontabs.rows[0]["crontabs"], null, 4)}`)
 
     const runner = run({
+        logger: workerLogger,
         connectionString: pgUser,
         schema: workerSchema,
         concurrency: workerConcurrency,

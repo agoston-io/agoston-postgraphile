@@ -33,9 +33,10 @@ module.exports = {
             'role': req.user === undefined ? pgDefaultAnonymousRole : req.user.role_name,
             'session.id': req.sessionID === undefined ? 'no-session-id' : req.sessionID,
             'session.is_authenticated': req.user === undefined ? false : true,
-            'session.user_id': req.user === undefined ? 0 : req.user.user_id,
-            'session.auth_provider': req.user === undefined ? null : req.user.auth_provider,
-            'session.auth_subject': req.user === undefined ? null : req.user.auth_subject,
+            'session.user_id': req.user?.user_id === undefined ? 0 : req.user.user_id,
+            'session.auth_provider': req.user?.auth_provider === undefined ? null : req.user.auth_provider,
+            'session.auth_subject': req.user?.auth_subject === undefined ? null : req.user.auth_subject,
+            'session.auth_data': req.user?.auth_data === undefined ? '{}' : JSON.stringify(req.user.auth_data),
         }
     },
     formatCORSInput: function (corsOriginsInput) {

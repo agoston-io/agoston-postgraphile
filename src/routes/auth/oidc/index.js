@@ -64,7 +64,7 @@ authOidc.forEach(function (oidcConfig) {
 
             router.get(`/${oidcConfig.name}/callback`, function (req, res, next) {
                 passport.authenticate(oidcConfig.name, function (err, user, info, status) {
-                    logger.info(`AUTH_OIDC[${oidcConfig.name}]: info:${info}, status: ${status}`)
+                    logger.debug(`AUTH_OIDC[${oidcConfig.name}]: info:${JSON.stringify(info)}, status: ${status}`)
                     if (err) {
                         res.redirect(`${JSON.parse(req.query.state).r.error}?message=bad-request&error=${encodeURI(err.message)}`);
                         return

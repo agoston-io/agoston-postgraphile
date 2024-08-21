@@ -10,7 +10,6 @@ module.exports = app => {
     if (stripeHookEnable) {
         app.use('/hook/stripe', require('./hook/stripe'))
     }
-    app.get('/', (req, res) => { res.redirect("https://agoston.io"); })
     app.use('/', session) // passport sessions to init before Passport strategies
     for (const authStrategy of helpers.getAuthStrategiesAvailable('header-based')) {
         if (helpers.authStrategyIsEnable(authStrategy)) {
