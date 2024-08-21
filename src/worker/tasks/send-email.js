@@ -8,6 +8,7 @@ const {
     workerStmpAuthPass,
 
 } = require('../../config-environment');
+const logger = require('../../log');
 
 /*
 ## payload format
@@ -33,7 +34,7 @@ SELECT add_job(
 */
 
 if (workerEmailEnable === true) {
-    console.log(`EMAIL: email enabled, creating transporter...`);
+    logger.info(`EMAIL: email enabled, creating transporter...`);
     var transporter = nodemailer.createTransport({
         pool: true,
         host: workerStmpHost,
@@ -46,12 +47,12 @@ if (workerEmailEnable === true) {
     });
     transporter.verify(function (error, success) {
         if (error) {
-            console.log(error);
+            logger.error(error);
         } else {
-            console.log("EMAIL: Server is ready to handle messages");
+            logger.log("EMAIL: Server is ready to handle messages");
         }
     });
-    console.log(`EMAIL: email enabled, transporter created.`);
+    logger.info(`EMAIL: email enabled, transporter created.`);
 }
 
 module.exports = async (payload, helpers) => {

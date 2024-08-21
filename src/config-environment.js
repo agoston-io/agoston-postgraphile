@@ -1,6 +1,6 @@
 const version = require('./package.json').version;
 const authStrategiesAvailable = require('./package.json').authStrategiesAvailable;
-const helpers = require('./helpers');
+const { getBoolean, formatCORSInput } = require('./helpers');
 
 const pgHost = process.env.PGHOST || 'postgres';
 const pgPostgresPort = parseInt(process.env.PGPORT || 5432);
@@ -17,17 +17,17 @@ module.exports = {
     versionMajor: version.split('.')[0],
     versionMinor: version.split('.')[1],
     versionPatch: version.split('.')[2],
-    debug: parseInt(process.env.DEBUG || 0),
+    logLevel: process.env.LOG_LEVEL || 'info',
     authStrategiesAvailable: authStrategiesAvailable,
     environment: environment,
-    backendHttpListening: helpers.stringToBoolean(process.env.HTTP_LISTENING || true),
+    backendHttpListening: getBoolean(process.env.HTTP_LISTENING || true),
     backendHttpPortListening: parseInt(process.env.HTTP_PORT_LISTENING || 8080),
-    backendHttpsListening: helpers.stringToBoolean(process.env.HTTPS_LISTENING || false),
+    backendHttpsListening: getBoolean(process.env.HTTPS_LISTENING || false),
     backendHttpsPortListening: parseInt(process.env.HTTPS_PORT_LISTENING || 8043),
     backendHttpsCertificate: process.env.HTTPS_PORT_CERTIFICATE || '/tmp/server.crt',
     backendHttpsPrivateKey: process.env.HTTPS_PORT_PRIVATEKEY || '/tmp/server.key',
     backendOrigin: process.env.HTTP_BACKEND_ORIGIN || '',
-    corsOrigins: helpers.formatCORSInput(`${process.env.HTTP_BACKEND_ORIGIN || ''},${process.env.CORS_ORIGIN || ''}`),
+    corsOrigins: formatCORSInput(`${process.env.HTTP_BACKEND_ORIGIN || ''},${process.env.CORS_ORIGIN || ''}`),
     pgDefaultAnonymousRole: "anonymous",
     // In dev mode, 2 pg conn are used to watch the db changes.
     pgPoolMaxSize: ((environment === 'production' ? 0 : 2) + parseInt(process.env.PG_POOL_MAX_SIZE || 2)),
@@ -49,9 +49,8 @@ module.exports = {
     authStrategies: JSON.parse(process.env.AUTH_STRATEGIES || '{}'),
     authOidc: JSON.parse(process.env.AUTH_OIDC || '[]'),
     authOidcTimeout: parseInt(process.env.AUTH_OIDC_TIMEOUT || 10000),
-    authCreateUserIfNotExits: helpers.stringToBoolean(process.env.AUTH_CREATE_USER_IF_NOT_EXITS || true),
     // Stripe hook
-    stripeHookEnable: helpers.stringToBoolean(process.env.STRIPE_HOOK_ENABLE || false),
+    stripeHookEnable: getBoolean(process.env.STRIPE_HOOK_ENABLE || false),
     stripeApiKey: process.env.STRIPE_API_KEY || '',
     stripeHookEndPointSecret: process.env.STRIPE_HOOK_ENDPOINT_SECRET || '',
     // Worker
@@ -59,10 +58,10 @@ module.exports = {
     workerCronJobLimit: parseInt(process.env.WORKER_CRON_JOB_LIMIT || 10),
     workerConcurrency: parseInt(process.env.WORKER_CONCURRENCY || 5),
     workerPollInterval: parseInt(process.env.WORKER_POLL_INTERVAL || 1000),
-    workerEmailEnable: helpers.getBoolean(process.env.WORKER_EMAIL_ENABLE || false),
+    workerEmailEnable: getBoolean(process.env.WORKER_EMAIL_ENABLE || false),
     workerStmpHost: process.env.WORKER_EMAIL_SMTP_HOST || '',
     workerStmpPort: parseInt(process.env.WORKER_EMAIL_SMTP_PORT || 25),
-    workerStmpSecure: helpers.getBoolean(process.env.WORKER_EMAIL_SMTP_SECURE || true),
+    workerStmpSecure: getBoolean(process.env.WORKER_EMAIL_SMTP_SECURE || true),
     workerStmpAuthUser: process.env.WORKER_EMAIL_SMTP_AUTH_USER || '',
     workerStmpAuthPass: process.env.WORKER_EMAIL_SMTP_AUTH_PASS || '',
     // Upload

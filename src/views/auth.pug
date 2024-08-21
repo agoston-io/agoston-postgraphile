@@ -74,8 +74,8 @@ html
             a(href=`/auth/oidc/${oidcConfig.name}?${loginRedirectUrls}`) URL
 
     if authStrategyIsEnable({"name":"user-pwd"})
-      h2 Authentication with user / password
-        form(action="/auth/user-pwd?redirect=true&auth_redirect_success=/auth/session&auth_redirect_error=/auth/session",class="loginForm",method="post")
+      h2 Sign up with user / password
+        form(action="/auth/user-pwd/signup?redirect=true&auth_redirect_success=/auth/session&auth_redirect_error=/auth/session",class="loginForm",method="post")
           label(for="username") Username
           input(type="text",name="username",id="username")
           br
@@ -84,7 +84,17 @@ html
           br
           input(type="hidden",name="free_value",id="free_value",value={'attr1': 'val1', 'attr2': 'val2'})
           br
-          input(type="submit", value="login / signup", class="button")
+          input(type="submit", value="Sign up", class="button")
+
+      h2 Login with user / password
+        form(action="/auth/user-pwd/login?redirect=true&auth_redirect_success=/auth/session&auth_redirect_error=/auth/session",class="loginForm",method="post")
+          label(for="username") Username
+          input(type="text",name="username",id="username")
+          br
+          label(for="password") Password
+          input(type="password",name="password",id="password")
+          br
+          input(type="submit", value="Login", class="button")
 
     include footer.pug
 

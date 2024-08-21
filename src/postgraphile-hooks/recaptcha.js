@@ -1,5 +1,6 @@
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-const { recaptchaSecretKey, recaptchaScoreThreshold } = require('../config-environment')
+const { recaptchaSecretKey, recaptchaScoreThreshold } = require('../config-environment');
+const logger = require('../log');
 
 const recaptchaHookFromBuild = build => fieldContext => {
     const {
@@ -14,7 +15,7 @@ const recaptchaHookFromBuild = build => fieldContext => {
 
     // Defining the callback up front makes the code easier to read.
     const verifyRecaptchaError = (error) => {
-        console.log(error);
+        logger.error(error);
         return error;
     };
 
@@ -23,9 +24,9 @@ const recaptchaHookFromBuild = build => fieldContext => {
         secretKey = recaptchaSecretKey;
         scoreThreshold = recaptchaScoreThreshold;
         recaptchaToken = context.getHeader("Recaptcha-Token");
-        console.log("scoreThreshold: %o", scoreThreshold);
-        console.log("secretKey: %o", secretKey);
-        console.log("recaptchaToken: %o", recaptchaToken);
+        logger.debug("scoreThreshold: %o", scoreThreshold);
+        logger.debug("secretKey: %o", secretKey);
+        logger.debug("recaptchaToken: %o", recaptchaToken);
 
         // Here get token and validate recaptcha
         // Return error recaptcha verification error if not ok
@@ -34,7 +35,7 @@ const recaptchaHookFromBuild = build => fieldContext => {
             { method: "POST" })
             .then(response => response.json());
 
-        console.log(response);
+        logger.debug(response);
         if (!response.success) throw new Error(
             `recaptcha: ${response["error-codes"]}`
         );

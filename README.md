@@ -111,6 +111,18 @@ export UPLOAD_DIR_NAME='./uploads'
 
 ### HTTP Bearer
 
+You can enable the HTTP Bearer authentication by appending the following configuration to the `AUTH_STRATEGIES` run time environment variable:
+
+```json
+{
+  "http-bearer": {
+    "enable": true
+  }
+}
+```
+
+#### Generate a token for a user
+
 Generate a bearer token for a user (or a new user created on the fly with `agoston_api.add_user()`):
 
 ```sql
@@ -168,6 +180,22 @@ curl -s -X POST \
       "auth_subject": "1",
       "auth_provider": "http-bearer",
       "is_authenticated": true
+    }
+  }
+}
+```
+
+### Local user and password
+
+You can enable the local user and password authentication by appending the following configuration to the `AUTH_STRATEGIES` run time environment variable:
+
+```json
+{
+  "user-pwd": {
+    "enable": true,
+    "params": {
+      "usernameComplexityPattern": "^[a-z0-9-_.@]{5,}$",
+      "passwordComplexityPattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*,-_])(?=.{8,})"
     }
   }
 }

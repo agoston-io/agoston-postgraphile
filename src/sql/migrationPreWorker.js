@@ -1,5 +1,7 @@
 const { Client } = require('pg')
 const softwareVersion = require('../package.json').version;
+const logger = require('../log');
+
 const {
     pgPostgresUri,
     workerSchema,
@@ -48,7 +50,8 @@ module.exports = async function migrationPreWorker() {
 
     if (softwareVersion === '3.15.0' && databaseVersion !== '3.15.0' && !isFirstStartedBackend) {
 
-        console.log(`INFO | MIGRATIONPREWORKER | Worker for Agoston v${softwareVersion} must be upgraded (removed and installed again).`)
+
+        logger.info(`MIGRATIONPREWORKER | Worker for Agoston v${softwareVersion} must be upgraded (removed and installed again).`)
 
         await client.query(`
             drop schema if exists ${workerSchema} cascade;

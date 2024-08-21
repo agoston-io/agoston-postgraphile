@@ -1,6 +1,7 @@
 const Router = require('express-promise-router')
 const bodyParser = require('body-parser');
 const { stripeApiKey, stripeHookEndPointSecret } = require('../../config-environment')
+const logger = require('../../log')
 const stripe = require('stripe')(stripeApiKey);
 const db = require('../../db-pool-postgraphile');
 
@@ -16,7 +17,7 @@ router.post('/', bodyParser.raw({ type: 'application/json' }), async (request, r
     try {
         event = stripe.webhooks.constructEvent(payload, sig, stripeHookEndPointSecret);
     } catch (err) {
-        console.error(`Stripe webhook Error: ${err.message}`);
+        logger.error(`Stripe webhook Error: ${err.message}`);
         return response.status(400).send(`Stripe webhook Error: ${err.message}`);
     }
 
@@ -27,7 +28,7 @@ router.post('/', bodyParser.raw({ type: 'application/json' }), async (request, r
             event,
         ])
     } catch (err) {
-        console.log(`Stripe webhook Error: ${err.message}`);
+        logger.error(`Stripe webhook Error: ${err.message}`);
         return response.status(400).send(`Stripe webhook Error: ${err.message}`);
     }
 

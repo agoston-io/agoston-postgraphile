@@ -9,7 +9,8 @@ const fs = require("fs");
 const path = require("path");
 const { getPgSettings } = require('../helpers');
 const db = require('./../db-pool-postgraphile');
-const { environment, pgpSchema, pgPostgresUri, UploadDirName, pgDefaultAnonymousRole } = require('../config-environment')
+const { environment, pgpSchema, pgPostgresUri, UploadDirName, pgDefaultAnonymousRole } = require('../config-environment');
+const logger = require('../log');
 
 const router = new Router()
 module.exports = router
@@ -19,7 +20,7 @@ router.use(graphqlUploadExpress());
 // Ensure upload directory exists and is a directory
 try {
     if (fs.statSync(UploadDirName).isDirectory()) {
-        console.log(`INFO | DIRECTORY | upload directory is: ${UploadDirName}`);
+        logger.info(`DIRECTORY | upload directory is: ${UploadDirName}`);
     }
 } catch (err) {
     throw new Error(`The directory '${UploadDirName}' does NOT exist (${err.message}).`);

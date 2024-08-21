@@ -3,7 +3,6 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
-
 const {
     corsOrigins,
     backendHttpListening,
@@ -14,7 +13,9 @@ const {
     backendHttpsPrivateKey,
     environment,
     version
-} = require('./config-environment')
+} = require('./config-environment');
+const logger = require('./log');
+
 
 // Applications
 module.exports = async function app() {
@@ -26,6 +27,7 @@ module.exports = async function app() {
     app.set('view engine', 'pug')
 
     // CORS Origin
+    logger.info(`CORS: ${JSON.stringify(corsOrigins, null, 4)}`)
     app.use(cors({
         "origin": function (origin, callback) {
             if (corsOrigins.allowedlist.indexOf(origin) !== -1 || !origin) {
@@ -47,10 +49,7 @@ module.exports = async function app() {
         }
         return `auth=${req.user.auth_provider || 'none'}|${req.user.role_name || 'none'}|user_id=${req.user.user_id || 'none'}`
     })
-    morgan.token('origin', req => {
-        return req.get('origin');
-    })
-    app.use(morgan('origin[:origin] :method :url :status :res[content-length] - :response-time ms - :auth'))
+    app.use(morgan(':method :url :status :res[content-length] - :response-time ms - :auth', { stream: logger.stream }));
 
 
     // Routes
@@ -62,7 +61,7 @@ module.exports = async function app() {
         var http = require('http');
         var httpServer = http.createServer(app);
         httpServer.listen(backendHttpPortListening, () => {
-            console.info(`INFO | SERVER | ${environment} HTTP server v${version} listening on ${backendHttpPortListening}.`);
+            logger.info(`SERVER | ${environment} HTTP server v${version} listening on ${backendHttpPortListening}.`);
         });
     }
 
@@ -75,7 +74,7 @@ module.exports = async function app() {
         var credentials = { key: privateKey, cert: certificate };
         var httpsServer = https.createServer(credentials, app);
         httpsServer.listen(backendHttpsPortListening, () => {
-            console.info(`INFO | SERVER | ${environment} HTTPS server v${version} listening on ${backendHttpsPortListening}.`);
+            logger.info(`SERVER | ${environment} HTTPS server v${version} listening on ${backendHttpsPortListening}.`);
         });
     }
 }

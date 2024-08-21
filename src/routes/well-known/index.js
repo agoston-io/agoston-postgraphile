@@ -3,6 +3,7 @@ const { authStrategies, authStrategiesAvailable, authOidc, version, backendOrigi
 const { watchPostGraphileSchema, withPostGraphileContext } = require('postgraphile');
 const { getPgSettings } = require('../../helpers');
 const { graphql } = require('graphql');
+const logger = require('../../log')
 const { pgPoolPostgraphile } = require('./../../db-pool-postgraphile');
 const PgSimplifyInflectorPlugin = require("@graphile-contrib/pg-simplify-inflector");
 const PgAggregatesPlugin = require("@graphile/pg-aggregates").default;
@@ -26,8 +27,8 @@ watchPostGraphileSchema(
     (newSchema) => {
         graphqlSchema = newSchema;
     },
-).then(() => { console.log("INFO | CONFIGURATION | GraphQL schema generated and watched.") })
-    .catch(error => { console.error(error) });
+).then(() => { logger.info("CONFIGURATION | GraphQL schema generated and watched.") })
+    .catch(error => { logger.error(error) });
 
 async function performQuery(graphqlSchema, req, query, variables, operationName = null) {
     return await withPostGraphileContext(
@@ -57,7 +58,8 @@ router.get('/configuration', async (req, res) => {
                 type: 'passport',
                 has_auth_link: strategy.hasAuthLink,
                 auth_link: strategy.hasAuthLink ? `${backendOrigin}/auth/${strategy.name}` : null,
-                post_auth_endpoint: strategy.name === 'user-pwd' ? `${backendOrigin}/auth/user-pwd` : null,
+                post_auth_endpoint: strategy.name === 'user-pwd' ? `${backendOrigin}/auth/user-pwd/login` : null,
+                post_signup_endpoint: strategy.name === 'user-pwd' ? `${backendOrigin}/auth/user-pwd/signup` : null,
                 is_cookie_based: strategy.isCookieBased,
                 enable: authStrategies[strategy.name]?.enable || false
             }

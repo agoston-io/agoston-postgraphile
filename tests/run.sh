@@ -27,7 +27,8 @@ function run_sql_tests () {
 }
 
 function run_auth_tests () {
-    curl -k -X POST -d 'username=anyuser&password=s2ssDD3hf3-' -c /tmp/cookie.txt https://localhost:8043/auth/user-pwd
+    curl -k -X POST -d 'username=user-123456789&password=azerty' https://localhost:8043/auth/user-pwd/signup
+    curl -k -X POST -d 'username=user-123456789&password=azerty' -c /tmp/cookie.txt https://localhost:8043/auth/user-pwd/login
     returned_code=$(curl -k -X POST --cookie /tmp/cookie.txt -s -o /dev/null -w "%{http_code}" https://localhost:8043/auth/logout)
     if [ $returned_code -ne 201 ]; then
         echo "Error while logging out of the session!"; exit 1
