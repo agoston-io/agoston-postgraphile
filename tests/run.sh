@@ -41,7 +41,8 @@ function run_auth_tests () {
 
 function run_configuration_tests () {
 
-    token="$(docker exec -i -u postgres agoston-postgraphile-postgres-1 psql agoston -c "select 'token:'||set_user_token(p_user_id => agoston_api.add_user());"|grep 'token:'|awk -F':' '{print $2}')"
+    user_id="$(docker exec -i -u postgres agoston-postgraphile-postgres-1 psql agoston -c "select 'user_id:'||agoston_api.add_user();"|grep 'user_id:'|awk -F':' '{print $2}')"
+    token="$(docker exec -i -u postgres agoston-postgraphile-postgres-1 psql agoston -c "select 'token:'||agoston_api.set_user_token(p_user_id => ${user_id});"|grep 'token:'|awk -F':' '{print $2}')"
 
     role_detected=$(curl -k -s -X GET \
         -H "Content-Type: application/json" \
@@ -58,7 +59,7 @@ function run_configuration_tests () {
     fi
 
     role_detected=$(curl -k -s -X GET \
-        -H "Authorization: Bearer ${token}" \
+        -H "Authorization: Bearer ${user_id}:${token}" \
         -H "Content-Type: application/json" \
         "https://localhost:8043/.well-known/configuration?gq=query%7Bsession%7D" | jq -r '.currentSession.role')
     if [[ "${role_detected}" != "authenticated" ]]; then
@@ -66,7 +67,7 @@ function run_configuration_tests () {
     fi
 
     role_detected=$(curl -k -s -X GET \
-        -H "Authorization: Bearer ${token}" \
+        -H "Authorization: Bearer ${user_id}:${token}" \
         -H "Content-Type: application/json" \
         "https://localhost:8043/.well-known/configuration?gq=query%7Bsession%7D" | jq -r '.customGraphQLQueryResult.data.session.role')
     if [[ "${role_detected}" != "authenticated" ]]; then

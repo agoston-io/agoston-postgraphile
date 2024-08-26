@@ -44,6 +44,37 @@ begin
 
 end $$;
 
+
+------------------------------------------------------------------------
+-- User token
+------------------------------------------------------------------------
+set role :postgraphile_user;
+
+do $$
+declare
+    v_iterator int := 0;
+    v_user_id int;
+    v_token text;
+begin
+    while v_iterator < 100 loop
+        raise notice 'token test % / 100', v_iterator;
+        select agoston_api.add_user() into v_user_id;
+        select agoston_api.set_user_token(p_user_id=>v_user_id) into v_token;
+        perform agoston_api.get_user_by_token(v_user_id, v_token);
+        assert (select cast(auth_data->'token'->>'expiration_ts' as timestamp with time zone) from get_user_by_token(v_user_id, v_token)) > now() + interval '9 YEARS';
+        select agoston_api.set_user_token(p_user_id=>v_user_id, p_expiration_ts => now() + interval '24 hours') into v_token;
+        assert (select cast(auth_data->'token'->>'expiration_ts' as timestamp with time zone) from get_user_by_token(v_user_id, v_token)) between now() + interval '23 HOURS' and now() + interval '25 HOURS';
+        select agoston_api.set_user_token(p_user_id=>v_user_id, p_token_name=> 'test_1_'||v_user_id||'_'||v_iterator) into v_token;
+        assert (select cast(auth_data->'token'->>'name' as text) from get_user_by_token(v_user_id, v_token)) = 'test_1_'||v_user_id||'_'||v_iterator;
+        assert (select cast(auth_data->'token'->>'expiration_ts' as timestamp with time zone) from get_user_by_token(v_user_id, v_token)) > now() + interval '9 YEARS';
+        select agoston_api.set_user_token(p_user_id=>v_user_id, p_token_name=> 'test_2_'||v_user_id||'_'||v_iterator, p_expiration_ts => now() + interval '24 hours') into v_token;
+        assert (select cast(auth_data->'token'->>'name' as text) from get_user_by_token(v_user_id, v_token)) = 'test_2_'||v_user_id||'_'||v_iterator;
+        assert (select cast(auth_data->'token'->>'expiration_ts' as timestamp with time zone) from get_user_by_token(v_user_id, v_token)) between now() + interval '23 HOURS' and now() + interval '25 HOURS';
+        assert (select user_id from get_user_by_token(v_user_id, v_token)) = v_user_id;
+        v_iterator := v_iterator+1;
+    end loop;
+end $$;
+
 ------------------------------------------------------------------------
 -- Developer user
 ------------------------------------------------------------------------
@@ -66,12 +97,29 @@ begin
     -- Users
     select agoston_api.add_user () into v_user_id;
     select agoston_api.set_user_token (p_user_id => v_user_id) into v_user_token;
-    perform agoston_api.get_user_by_token (v_user_token);
+    perform agoston_api.get_user_by_token (v_user_id, v_user_token);
     perform agoston_api.delete_user (v_user_id);
 
 end $$;
 
+------------------------------------------------------------------------
+-- User token deletion
+------------------------------------------------------------------------
+set role :postgraphile_user;
+
+do $$
+declare
+    v_token record;
+begin
+    for v_token in (select * from agoston_identity.user_tokens) loop
+        assert agoston_api.delete_user_token(p_user_token_id => v_token.id);
+    end loop;
+end $$;
+
+
+------------------------------------------------------------------------
 -- Jobs
+------------------------------------------------------------------------
 do $$
 declare
     v_job record;

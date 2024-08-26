@@ -109,6 +109,9 @@ module.exports = {
             }
         }).toString('base64')
     },
+    isInt: function (value) {
+        return !isNaN(value) && (function (x) { return (x | 0) === x; })(parseFloat(value))
+    },
     getBoolean: function (value) {
         if (typeof value === 'string') {
             switch (value.toLowerCase()) {

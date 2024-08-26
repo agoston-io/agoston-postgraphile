@@ -137,6 +137,17 @@ select set_user_token(p_user_id => agoston_api.add_user()) as "token";
 (1 row)
 ```
 
+It is also possible to add a name and/or an expiration date to the token:
+
+```sql
+function agoston_api.set_user_token (
+    p_user_id int,
+    p_token_name text default null,
+    -- Token expires after 10 years per default. You can overwrite with p_expiration_ts.
+    p_expiration_ts timestamp with time zone default null
+);
+```
+
 #### Example without bearer token
 
 ```bash
@@ -186,6 +197,14 @@ curl -s -X POST \
     }
   }
 }
+```
+
+#### Delete a token for a user
+
+```sql
+select agoston_api.delete_user_token(
+    p_user_token_id => <user_id>
+);
 ```
 
 ### Local user and password
