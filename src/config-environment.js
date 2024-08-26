@@ -18,6 +18,7 @@ module.exports = {
     versionMinor: version.split('.')[1],
     versionPatch: version.split('.')[2],
     logLevel: process.env.LOG_LEVEL || 'info',
+    logColor: getBoolean(process.env.LOG_COLOR || false),
     authStrategiesAvailable: authStrategiesAvailable,
     environment: environment,
     backendHttpListening: getBoolean(process.env.HTTP_LISTENING || true),

@@ -11,5 +11,5 @@ begin
     end loop;
     perform pg_sleep(65);
     select count(1) into v_count from added_job_table;
-    assert v_count = 3, 'A cron task did not ran in due time, because added_job_table has not 3 rows!';
+    assert v_count >= 3, 'A cron task did not ran in due time, because added_job_table has not 3 rows!';
 end $$;

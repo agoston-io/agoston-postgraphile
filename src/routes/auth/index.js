@@ -55,9 +55,27 @@ router.post(`/logout`, (req, res) => {
         if (req.session.passport.hasOwnProperty("user")) {
             if (req.session.passport.user.hasOwnProperty("role_name")) {
                 if (req.session.passport.user.role_name === 'authenticated') {
+                    // OIDC session to send to client for "from browser session destruction"
+                    var oidc = {
+                        has_oidc_session: false,
+                        end_session_endpoint: null,
+                        session_id_token: null,
+                    }
+                    if (req.session?.passport?.user?.oidc?.issuer_metadata?.end_session_endpoint != undefined) {
+                        logger.debug(`end_session_endpoint => ${req.session?.passport?.user?.oidc?.issuer_metadata?.end_session_endpoint}`);
+                        logger.debug(`session_id_token => ${req.session?.passport?.user?.oidc?.session_id_token}`);
+                        var oidc = {
+                            has_oidc_session: true,
+                            end_session_endpoint: req.session?.passport?.user?.oidc?.issuer_metadata?.end_session_endpoint,
+                            session_id_token: req.session?.passport?.user?.oidc?.session_id_token,
+                        }
+                    }
+                    logger.debug(`oidc => ${oidc}`);
+                    // Destroy local session
                     req.session.destroy(function (err) {
                         res.status(201).json({
-                            message: 'session destroyed'
+                            message: 'session destroyed',
+                            oidc: oidc
                         });
                     });
                 }

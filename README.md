@@ -55,8 +55,11 @@ docker rmi agoston-postgraphile-dev agoston-postgres-dev
 #---------- HTTP configuration
 export HTTP_LISTENING=1
 export HTTP_PORT_LISTENING=8080
+#---------- Log level
+export LOG_LEVEL=silly # Winston log level
+export LOG_COLOR=true  # Winston log color
 #---------- HTTPS configuration
-export HTTPS_LISTENING=0
+export HTTPS_LISTENING=0  # Useful for development, otherwise disable and shield with a reverse proxy
 export HTTPS_PORT_LISTENING=8043
 export HTTPS_PORT_CERTIFICATE=/tmp/server.crt
 export HTTPS_PORT_PRIVATEKEY=/tmp/server.key

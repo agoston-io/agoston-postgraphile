@@ -58,6 +58,7 @@ services:
       - PG_POOL_MAX_SIZE=2
       - ENVIRONMENT_NAME=development
       - LOG_LEVEL=silly
+      - LOG_COLOR=true
       - HTTPS_LISTENING=true
       - HTTPS_PORT_CERTIFICATE=/ssl/graphile.agoston.dev.local.crt
       - HTTPS_PORT_PRIVATEKEY=/ssl/graphile.agoston.dev.local.key
