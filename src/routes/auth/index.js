@@ -70,7 +70,7 @@ router.post(`/logout`, (req, res) => {
                             session_id_token: req.session?.passport?.user?.oidc?.session_id_token,
                         }
                     }
-                    logger.debug(`oidc => ${oidc}`);
+                    logger.debug(`oidc => ${JSON.stringify(oidc)}`);
                     // Destroy local session
                     req.session.destroy(function (err) {
                         res.status(201).json({

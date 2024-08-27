@@ -10,6 +10,8 @@ const router = new Router()
 module.exports = router
 
 const LocalStrategy = require('passport-local').Strategy;
+var createUserIfNotExits = authStrategyGetParameterValue('user-pwd', 'createUserIfNotExits');
+if (typeof createUserIfNotExits !== 'boolean') { throw new Error('"createUserIfNotExits" is not a boolean!'); }
 const usernameComplexityPattern = authStrategyGetParameterValue('user-pwd', 'usernameComplexityPattern');
 if (typeof usernameComplexityPattern !== 'string') { throw new Error('"usernameComplexityPattern" is not a string!'); }
 const passwordComplexityPattern = authStrategyGetParameterValue('user-pwd', 'passwordComplexityPattern');
@@ -17,10 +19,7 @@ if (typeof passwordComplexityPattern !== 'string') { throw new Error('"passwordC
 
 passport.use(new LocalStrategy({ passReqToCallback: true },
     async function verify(req, username, password, cb) {
-        var createUserIfNotExits = false;
-        var createSessionOnSignup = false;
-        console.log(`req.path => ${req.path}`)
-        if (req.path === '/user-pwd/login') { createUserIfNotExits = false; }
+        logger.debug(`req.path => ${req.path}`)
         if (req.path === '/user-pwd/signup') { createUserIfNotExits = true; }
         try {
             result = await db.query('select * from agoston_api.set_authenticated_user(p_provider => $1, p_subject => $2, p_raw => $3, p_password => $4, p_username_complexity_pattern => $5, p_password_complexity_pattern => $6, p_create_user_if_not_exits => $7)', [
