@@ -20,5 +20,5 @@ module.exports = async (payload, helpers) => {
     } finally {
         await client.end()
     }
-    helpers.logger.debug(`${result}`)
+    helpers.logger.debug(`${JSON.stringify(result)}`)
 };

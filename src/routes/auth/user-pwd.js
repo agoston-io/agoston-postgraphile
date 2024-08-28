@@ -19,30 +19,34 @@ if (typeof passwordComplexityPattern !== 'string') { throw new Error('"passwordC
 
 passport.use(new LocalStrategy({ passReqToCallback: true },
     async function verify(req, username, password, cb) {
-        logger.debug(`req.path => ${req.path}`)
+        logger.debug(`verify | req.path => ${req.path}`)
+        logger.debug(`verify | req.body => ${JSON.stringify(req.body)}`)
         if (req.path === '/user-pwd/signup') { createUserIfNotExits = true; }
         try {
             result = await db.query('select * from agoston_api.set_authenticated_user(p_provider => $1, p_subject => $2, p_raw => $3, p_password => $4, p_username_complexity_pattern => $5, p_password_complexity_pattern => $6, p_create_user_if_not_exits => $7)', [
                 'user-pwd',
                 username,
-                req.body.free_value || {},
+                req.body?.free_value || {},
                 password,
                 usernameComplexityPattern,
                 passwordComplexityPattern,
                 createUserIfNotExits,
             ])
         } catch (err) {
-            logger.error(`auth[passport-local] query error: ${err.message}`);
+            logger.error(`auth[passport-local] ${err}`);
             return cb(err);
         }
         logger.debug(`result.rows[0] ${JSON.stringify(result.rows)}`)
         if (result.rows.length === 0) { return cb(null, false, { message: 'user-not-found' }); }
+        if (req.path === '/user-pwd/signup' && result.rows.length > 0 && result.rows[0]["user_existed"]) { return cb(null, false, { message: 'user-already-exists' }); }
         return cb(null, result.rows[0], { scope: 'all' });
     }
 ));
 
 router.post('/user-pwd/login', bodyParser.json(), function (req, res, next) {
+    logger.debug(`${req.path} | req.body => ${JSON.stringify(req.body)}`)
     passport.authenticate('local', function (err, user, info, status) {
+        logger.debug(`${req.path} | err=${err}, user=${JSON.stringify(user)}, info=${JSON.stringify(info)}, status=${status}}`)
         var skipRedirect = (req.query?.redirect === "false");
         if (err) {
             if (skipRedirect) {
@@ -54,9 +58,9 @@ router.post('/user-pwd/login', bodyParser.json(), function (req, res, next) {
         }
         if (!user) {
             if (skipRedirect) {
-                res.status(401).json({ message: 'not-found' });
+                res.status(400).json({ message: info?.message || 'internal-error' });
             } else {
-                res.redirect(`${deriveAuthRedirectUrl(req, 'auth_redirect_error')}?message=not-found`);
+                res.redirect(`${deriveAuthRedirectUrl(req, 'auth_redirect_error')}?message=${info?.message || 'internal-error'}`);
             }
             return
         }
@@ -79,8 +83,16 @@ router.post('/user-pwd/login', bodyParser.json(), function (req, res, next) {
     })(req, res, next)
 });
 
-router.post('/user-pwd/signup', bodyParser.json(), function (req, res, next) {
+router.post('/user-pwd/signup', bodyParser.json(), async function (req, res, next) {
+    logger.debug(`${req.path} | req.session => ${JSON.stringify(req.session)}`)
+    logger.debug(`${req.path} | req.body => ${JSON.stringify(req.body)}`)
+    if (req.session?.passport?.user?.role_name || '' === "authenticated") {
+        await req.session.destroy(function (err) {
+            logger.debug(`${req.path} | session destroy. Err => ${err}`)
+        });
+    }
     passport.authenticate('local', function (err, user, info, status) {
+        logger.debug(`${req.path} | err=${err}, user=${JSON.stringify(user)}, info=${JSON.stringify(info)}, status=${status}}`)
         var skipRedirect = (req.query?.redirect === "false");
         if (err) {
             if (skipRedirect) {
@@ -92,14 +104,13 @@ router.post('/user-pwd/signup', bodyParser.json(), function (req, res, next) {
         }
         if (!user) {
             if (skipRedirect) {
-                res.status(401).json({ message: 'internal-error' });
+                res.status(400).json({ message: info?.message || 'internal-error' });
             } else {
-                res.redirect(`${deriveAuthRedirectUrl(req, 'auth_redirect_error')}?message=internal-error`);
+                res.redirect(`${deriveAuthRedirectUrl(req, 'auth_redirect_error')}?message=${info?.message || 'internal-error'}`);
             }
             return
         }
         var message = 'user-created';
-        if (!user['user_existed']) { message = 'user-existed'; }
         if (skipRedirect) {
             res.status(200).json({ message: message });
         } else {

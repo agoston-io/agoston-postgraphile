@@ -28,7 +28,7 @@ passport.use(new BearerStrategy({ passReqToCallback: true },
                 token_text
             ])
         } catch (err) {
-            logger.error(`auth[passport-http-bearer] query error: ${err.message}`);
+            logger.error(`auth[passport-http-bearer] ${err.message}`);
             return cb(err);
         }
         if (result.rows.length === 0) { return cb(null, false); } // returns 401

@@ -25,7 +25,7 @@ passport.use(new GithubStrategy({
                 profile
             ])
         } catch (err) {
-            logger.error(`auth[github-oauth20] query error: ${err.message}`);
+            logger.error(`auth[github-oauth20] ${err.message}`);
             return cb(err);
         }
         return cb(null, result.rows[0]);

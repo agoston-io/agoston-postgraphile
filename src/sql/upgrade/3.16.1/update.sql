@@ -20,7 +20,7 @@ create or replace function agoston_api.set_authenticated_user (
 declare
     v_federated_credential_id integer := null;
     v_user_id integer := null;
-    v_user_existed boolean := false;
+    v_user_existed boolean := true;
 begin
     raise notice 'p_username_complexity_pattern => %', p_username_complexity_pattern;
     raise notice 'p_password_complexity_pattern => %', p_password_complexity_pattern;
@@ -55,7 +55,7 @@ begin
 
     -- User never created before: create it
     if v_user_id is null and p_create_user_if_not_exits then
-        v_user_existed := true;
+        v_user_existed := false;
         if p_provider = 'user-pwd' then
             -- Ensure password match pattern
             raise notice 'p_password_complexity_pattern => %', p_password_complexity_pattern;
@@ -110,6 +110,7 @@ begin
 end;
 $$
 language plpgsql;
+alter function agoston_api.set_authenticated_user owner to "##POSTGRAPHILE_USER##";
 
 create or replace function agoston_public.session (
 	)

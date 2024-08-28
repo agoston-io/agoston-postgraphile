@@ -26,7 +26,7 @@ passport.use(new FacebookStrategy({
                 profile
             ])
         } catch (err) {
-            logger.error(`auth[facebook-oauth20] query error: ${err.message}`);
+            logger.error(`auth[facebook-oauth20] ${err.message}`);
             return cb(err);
         }
         return cb(null, result.rows[0]);
