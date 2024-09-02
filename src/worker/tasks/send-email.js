@@ -49,7 +49,7 @@ if (workerEmailEnable === true) {
         if (error) {
             logger.error(error);
         } else {
-            logger.log("EMAIL: Server is ready to handle messages");
+            logger.info("EMAIL: Server is ready to handle messages");
         }
     });
     logger.info(`EMAIL: email enabled, transporter created.`);
