@@ -39,6 +39,7 @@ passport.use(new LocalStrategy({ passReqToCallback: true },
         logger.debug(`result.rows[0] ${JSON.stringify(result.rows)}`)
         if (result.rows.length === 0) { return cb(null, false, { message: 'user-not-found' }); }
         if (req.path === '/user-pwd/signup' && result.rows.length > 0 && result.rows[0]["user_existed"]) { return cb(null, false, { message: 'user-already-exists' }); }
+        if (result.rows[0]["password_expired"]) { return cb(null, false, { message: 'password-expired' }); }
         return cb(null, result.rows[0], { scope: 'all' });
     }
 ));
@@ -119,4 +120,22 @@ router.post('/user-pwd/signup', bodyParser.json(), async function (req, res, nex
         return
 
     })(req, res, next)
+});
+
+router.patch('/user-pwd/login', bodyParser.json(), async function (req, res, next) {
+    logger.debug(`${req.path} | req.body => ${JSON.stringify(req.body)}`);
+    try {
+        result = await db.query('select * from agoston_api.set_user_password(p_username => $1, p_password => $2, p_old_password => $3, p_password_complexity_pattern => $4)', [
+            req.body.username,
+            req.body.password,
+            req.body.old_password,
+            passwordComplexityPattern
+        ])
+    } catch (err) {
+        logger.error(`/user-pwd/update ${err}`);
+        res.json(400, {
+            message: err.message
+        });
+    }
+    res.status(204);
 });

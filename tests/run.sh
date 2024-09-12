@@ -37,6 +37,12 @@ function run_auth_tests () {
     if [ $returned_code -ne 404 ]; then
         echo "Error while deleting a none existing session!"; exit 1
     fi
+    curl -k -X PATCH -d 'username=user-123456789&old_password=azerty&password=azertyazerty' https://localhost:8043/auth/user-pwd/login
+    curl -k -X POST -d 'username=user-123456789&password=azertyazerty' -c /tmp/cookie.txt https://localhost:8043/auth/user-pwd/login
+    returned_code=$(curl -k -X POST --cookie /tmp/cookie.txt -s -o /dev/null -w "%{http_code}" https://localhost:8043/auth/logout)
+    if [ $returned_code -ne 201 ]; then
+        echo "Error while logging out of the session!"; exit 1
+    fi
 }
 
 function run_configuration_tests () {
