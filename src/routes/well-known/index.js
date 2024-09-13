@@ -59,6 +59,7 @@ router.get('/configuration', async (req, res) => {
                 has_auth_link: strategy.hasAuthLink,
                 auth_link: strategy.hasAuthLink ? `${backendOrigin}/auth/${strategy.name}` : null,
                 post_auth_endpoint: strategy.name === 'user-pwd' ? `${backendOrigin}/auth/user-pwd/login` : null,
+                patch_auth_endpoint: strategy.name === 'user-pwd' ? `${backendOrigin}/auth/user-pwd/login` : null,
                 post_signup_endpoint: strategy.name === 'user-pwd' ? `${backendOrigin}/auth/user-pwd/signup` : null,
                 is_cookie_based: strategy.isCookieBased,
                 enable: authStrategies[strategy.name]?.enable || false

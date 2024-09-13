@@ -27,8 +27,32 @@ function run_sql_tests () {
 }
 
 function run_auth_tests () {
-    curl -k -X POST -d 'username=user-123456789&password=azerty' https://localhost:8043/auth/user-pwd/signup
-    curl -k -X POST -d 'username=user-123456789&password=azerty' -c /tmp/cookie.txt https://localhost:8043/auth/user-pwd/login
+    # Check connection with an expired user
+    docker exec -it -u postgres agoston-postgraphile-postgres-1 psql agoston -c "
+        select agoston_api.set_authenticated_user(p_provider => 'user-pwd', p_subject => 'test-user-1', p_raw => '{}', p_password => 'Test-user-1' );
+        select agoston_api.set_user_password_expiration(p_username => 'test-user-1', p_password_expired => true);
+    "
+    returned_code=$(curl -k -X POST  -s -o /dev/null -w "%{http_code}" -d 'username=test-user-1&password=Test-user-1' https://localhost:8043/auth/user-pwd/login?redirect=false)
+    if [ $returned_code -ne 400 ]; then
+        echo "The login test with expired password should have failed!"; exit 1
+    fi
+    docker exec -it -u postgres agoston-postgraphile-postgres-1 psql agoston -c "
+        select agoston_api.set_user_password(p_username => 'test-user-1', p_password => 'Test-user-2', p_current_password => 'Test-user-1');
+    "
+    returned_code=$(curl -k -X POST  -s -o /dev/null -w "%{http_code}" -d 'username=test-user-1&password=Test-user-2' https://localhost:8043/auth/user-pwd/login?redirect=false)
+    if [ $returned_code -ne 200 ]; then
+        echo "The login test should have worked!"; exit 1
+    fi
+
+    # Check normal login/signup
+    returned_code=$(curl -k -X POST -d 'username=user-123456789&password=azerty' https://localhost:8043/auth/user-pwd/signup)
+    if [ $returned_code -ne 200 ]; then
+        echo "The singup test should have worked!"; exit 1
+    fi
+    returned_code=$(curl -k -X POST -d 'username=user-123456789&password=azerty' -c /tmp/cookie.txt https://localhost:8043/auth/user-pwd/login?redirect=false)
+    if [ $returned_code -ne 200 ]; then
+        echo "The login test should have worked!"; exit 1
+    fi
     returned_code=$(curl -k -X POST --cookie /tmp/cookie.txt -s -o /dev/null -w "%{http_code}" https://localhost:8043/auth/logout)
     if [ $returned_code -ne 201 ]; then
         echo "Error while logging out of the session!"; exit 1
@@ -36,6 +60,16 @@ function run_auth_tests () {
     returned_code=$(curl -k -X POST --cookie /tmp/cookie.txt -s -o /dev/null -w "%{http_code}" https://localhost:8043/auth/logout)
     if [ $returned_code -ne 404 ]; then
         echo "Error while deleting a none existing session!"; exit 1
+    fi
+    returned_code=$(curl -k -X PATCH -s -o /dev/null -w "%{http_code}" -d 'username=user-123456789&password=azertyazerty' https://localhost:8043/auth/user-pwd/login)
+    if [ $returned_code -ne 400 ]; then
+        echo "Error while changing password without the old password!"; exit 1
+    fi
+    curl -k -X PATCH -d 'username=user-123456789&currentPassword=azerty&password=azertyazerty' https://localhost:8043/auth/user-pwd/login
+    curl -k -X POST -d 'username=user-123456789&password=azertyazerty' -c /tmp/cookie.txt https://localhost:8043/auth/user-pwd/login
+    returned_code=$(curl -k -X POST --cookie /tmp/cookie.txt -s -o /dev/null -w "%{http_code}" https://localhost:8043/auth/logout)
+    if [ $returned_code -ne 201 ]; then
+        echo "Error while logging out of the session!"; exit 1
     fi
 }
 
