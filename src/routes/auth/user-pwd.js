@@ -125,10 +125,10 @@ router.post('/user-pwd/signup', bodyParser.json(), async function (req, res, nex
 router.patch('/user-pwd/login', bodyParser.json(), async function (req, res, next) {
     logger.debug(`${req.path} | req.body => ${JSON.stringify(req.body)}`);
     try {
-        result = await db.query('select * from agoston_api.set_user_password(p_username => $1, p_password => $2, p_old_password => $3, p_password_complexity_pattern => $4)', [
+        result = await db.query('select * from agoston_api.set_user_password(p_username => $1, p_password => $2, p_current_password => $3, p_password_complexity_pattern => $4)', [
             req.body.username,
             req.body.password,
-            req.body.old_password,
+            req.body.currentPassword || 'wrong-password',
             passwordComplexityPattern
         ])
     } catch (err) {
@@ -136,6 +136,10 @@ router.patch('/user-pwd/login', bodyParser.json(), async function (req, res, nex
         res.json(400, {
             message: err.message
         });
+        return
     }
-    res.status(204);
+    res.json(200, {
+        message: 'password-changed'
+    });
+    return
 });

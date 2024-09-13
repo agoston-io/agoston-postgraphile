@@ -223,6 +223,21 @@ You can enable the local user and password authentication by appending the follo
 }
 ```
 
+### Change user password
+
+```sql
+select set_user_password(p_username => 'myusername', p_password => 'Azerty@2026');
+-- Ensure the old password is correct before changing to the new password
+select set_user_password(p_username => 'myusername', p_password => 'Azerty@2026', p_current_password => 'Azerty@2025');
+```
+
+### Expire user password
+
+```sql
+select set_user_password_expiration(p_username => 'myusername', p_password_expired => true);
+select set_user_password_expiration(p_username => 'myusername', p_password_expired => false);
+```
+
 ## Backend run time configuration
 
 You can see the run-time configuration that the backend uses by calling the URL `<HTTP_BACKEND_ORIGIN>/.well-known/configuration`:

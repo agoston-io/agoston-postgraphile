@@ -3,7 +3,7 @@ alter table agoston_identity.user_identities add password_expired boolean not nu
 create or replace function agoston_api.set_user_password (
         p_username text,
         p_password text default null,
-        p_old_password text default null,
+        p_current_password text default null,
         p_password_complexity_pattern text default '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*,-_])(?=.{8,})'
 )
     returns table (
@@ -30,8 +30,8 @@ begin
     -- Ensure password match pattern
     raise notice 'p_password_complexity_pattern => %', p_password_complexity_pattern;
     raise notice 'p_password => %', p_password;
-    raise notice 'p_old_password => %', p_old_password;
-    if p_old_password is not null and not exists (select from agoston_identity.user_identities where id = d_user_id and hashed_password = public.crypt(p_old_password, hashed_password)) then
+    raise notice 'p_current_password => %', p_current_password;
+    if p_current_password is not null and not exists (select from agoston_identity.user_identities where id = d_user_id and hashed_password = public.crypt(p_current_password, hashed_password)) then
         raise exception 'The username/old password is incorrect.';
     end if;
     if not p_password ~ p_password_complexity_pattern then
@@ -40,7 +40,7 @@ begin
     update  agoston_identity.user_identities
     set     hashed_password = public.crypt(p_password, public.gen_salt('md5'))
     where   id = d_user_id;
-    if p_old_password is not null then
+    if p_current_password is not null then
         update  agoston_identity.user_identities set password_expired = false;
     end if;
 

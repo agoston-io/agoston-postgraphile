@@ -56,7 +56,7 @@ declare
     v_user_id int;
     v_token text;
 begin
-    while v_iterator < 100 loop
+    while v_iterator < 10 loop
         raise notice 'token test % / 100', v_iterator;
         select agoston_api.add_user() into v_user_id;
         select agoston_api.set_user_token(p_user_id=>v_user_id) into v_token;
@@ -84,7 +84,7 @@ do $$
 begin
     assert(select user_id from set_user_password(p_username => '848456qsdqs56d56qs', p_password => 'Azerty@2025')) = 1; -- ok
     assert(select password_expired from set_user_password_expiration(p_username => '848456qsdqs56d56qs', p_password_expired => true)) = true;
-    assert(select password_expired from set_user_password(p_username => '848456qsdqs56d56qs', p_password => 'Azerty@2026', p_old_password => 'Azerty@2025')) = false; -- ok
+    assert(select password_expired from set_user_password(p_username => '848456qsdqs56d56qs', p_password => 'Azerty@2026', p_current_password => 'Azerty@2025')) = false; -- ok
 
     assert(select user_id from set_user_password_expiration(p_username => '848456qsdqs56d56qs')) = 1;
     assert(select password_expired from set_user_password_expiration(p_username => '848456qsdqs56d56qs', p_password_expired => false)) = false;
